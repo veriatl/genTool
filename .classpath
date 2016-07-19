@@ -40,5 +40,9 @@
 			<accessrule ignoreifbetter="true" kind="nonaccessible" pattern="**/*"/>
 		</accessrules>
 	</classpathentry>
+	<classpathentry kind="src" path="/org.eclipse.m2m.atl.engine"/>
+	<classpathentry kind="src" path="/org.eclipse.m2m.atl.core"/>
+	<classpathentry kind="src" path="/org.eclipse.m2m.atl.core.emf"/>
+	<classpathentry kind="src" path="/org.eclipse.m2m.atl.common"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
