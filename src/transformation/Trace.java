@@ -78,22 +78,29 @@ public class Trace {
 	
 	
 	//TODO metamodel prefix
-	//TODO notgenby
+	//TODO notgenby, smart generated, check
 	public static Map<String, ArrayList<String>> getTrace(EPackage tarmm, ExecEnv env) throws Exception{
 		
 		Map<String, ArrayList<String>> rtn = new HashMap<String, ArrayList<String>>();
 		
+		String tarPrefix = tarmm.getName()+"$";
+		
+		
 		for(EClassifier cl : tarmm.getEClassifiers()){
+			String clName = tarPrefix+cl.getName();
+			
 			for(Rule r : env.getRules()){
 				
 				for(OutputRuleElement output : r.getOutputElements()){
-					if(cl.getName().equals(output.getType()) || EMFLoader.isSubtype(output.getType(), cl.getName(), tarmm)){
-						if(rtn.containsKey(cl.getName())){
-							rtn.get(cl.getName()).add(r.getName());
+					String outName = tarPrefix+output.getType();
+					
+					if(clName.equals(outName) || EMFLoader.isSubtype(outName, clName, tarmm)){
+						if(rtn.containsKey(clName)){
+							rtn.get(clName).add(r.getName());
 						}else{
 							ArrayList<String> trace = new ArrayList<String>();
 							trace.add(r.getName());
-							rtn.put(cl.getName(), trace);
+							rtn.put(clName, trace);
 						}
 					}
 				}

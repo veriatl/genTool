@@ -20,13 +20,13 @@ public class ContractLoader {
 	public static String atlEcore = "src/metamodel/ATL.ecore";
 
 	
-	public static List<OclExpression> contractLoader(String contractPath) throws Exception{
+	public static List<OclExpression> init(String contractPath) throws Exception{
 		InputStream input = new FileInputStream(contractPath);
 		AtlParser atlParser = AtlParser.getDefault();
 		IModel m = atlParser.parseToModel(input);
 		
-		IExtractor extractor = new EMFExtractor();
-		extractor.extract(m, contractPath+".xmi");
+		//IExtractor extractor = new EMFExtractor();
+		//extractor.extract(m, contractPath+".xmi");
 		
 		ArrayList<OclExpression> rtn = new ArrayList<OclExpression>();
 		
@@ -57,7 +57,7 @@ public class ContractLoader {
 	
 	
 	public static void main(String[] args) throws Exception{
-		contractLoader("HSM2FSM/Source/ContractSRC/HSM2FSMContract.atl");
+		init("HSM2FSM/Source/ContractSRC/HSM2FSMContract.atl");
 
 	}
 
