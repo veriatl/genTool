@@ -8,7 +8,9 @@ create OUT : FSM from IN : HSM;
 
 --@post
 helper context FSM!StateMachine def: unique_fsm_sm_names(): Boolean = -- different target state machines have different names
-  FSM!Transition.allInstances()->forAll(s1 | 
+  FSM!StateMachine.allInstances()->forAll(s1 | 
   	FSM!StateMachine.allInstances()->forAll(s2 | 
   	  s1<>s2 implies s1.name<>s2.name));
   
+
+
