@@ -7,17 +7,17 @@ import org.eclipse.m2m.atl.common.OCL.*;
 
 
 
-public class Node {
+public class Node implements Comparable {
 
 
 	int level;
 	OclExpression content;
 	OclExpression parent;
-	HashMap<EObject, String> context;
+	HashMap<EObject, ContextNature> context;
 	ProveOption rel2Parent;
 	Tactic ruleApplied;
 	
-	public Node(int lv, OclExpression ct, OclExpression pt, HashMap<EObject, String> ctx, ProveOption rel, Tactic rule){
+	public Node(int lv, OclExpression ct, OclExpression pt, HashMap<EObject, ContextNature> ctx, ProveOption rel, Tactic rule){
 		this.level = lv;
 		this.content = ct;
 		this.parent = pt;
@@ -25,6 +25,22 @@ public class Node {
 		this.rel2Parent = rel;
 		this.ruleApplied = rule;
 	}
+
+	@Override
+	public int compareTo(Object other) {
+		
+		if(other instanceof Node){
+			return this.level - ((Node)other).level;
+		}else{
+			return 0;
+		}
+		
+		
+	}
 	
-	
+	@Override
+	public String toString() {
+		
+		return String.format("Lv: %d, ctx: %s, applied %s", level, context.toString(), ruleApplied);
+	}
 }

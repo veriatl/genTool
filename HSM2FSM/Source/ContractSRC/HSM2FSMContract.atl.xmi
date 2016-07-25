@@ -9,37 +9,35 @@
       <definition location="10:8-13:39">
         <feature xsi:type="ocl:Operation" location="10:38-13:39" name="unique_fsm_sm_names">
           <returnType xsi:type="ocl:BooleanType" location="10:61-10:68"/>
-          <body xsi:type="ocl:OperatorCallExp" location="11:3-13:39" operationName="implies">
+          <body xsi:type="ocl:IteratorExp" location="11:2-13:39" name="forAll">
             <commentsBefore>-- different target state machines have different names</commentsBefore>
-            <source xsi:type="ocl:BooleanExp" location="11:3-11:7" booleanSymbol="true">
+            <source xsi:type="ocl:OperationCallExp" location="11:2-11:33" operationName="allInstances">
               <commentsBefore>-- different target state machines have different names</commentsBefore>
-            </source>
-            <arguments xsi:type="ocl:IteratorExp" location="11:16-13:39" name="forAll">
-              <source xsi:type="ocl:OperationCallExp" location="11:16-11:47" operationName="allInstances">
-                <source xsi:type="ocl:OclModelElement" location="11:16-11:32" name="StateMachine" model="/1"/>
+              <source xsi:type="ocl:OclModelElement" location="11:2-11:18" name="StateMachine" model="/1">
+                <commentsBefore>-- different target state machines have different names</commentsBefore>
               </source>
-              <body xsi:type="ocl:IteratorExp" location="12:4-13:38" name="forAll">
-                <source xsi:type="ocl:OperationCallExp" location="12:4-12:35" operationName="allInstances">
-                  <source xsi:type="ocl:OclModelElement" location="12:4-12:20" name="StateMachine" model="/1"/>
+            </source>
+            <body xsi:type="ocl:IteratorExp" location="12:4-13:38" name="forAll">
+              <source xsi:type="ocl:OperationCallExp" location="12:4-12:35" operationName="allInstances">
+                <source xsi:type="ocl:OclModelElement" location="12:4-12:20" name="StateMachine" model="/1"/>
+              </source>
+              <body xsi:type="ocl:OperatorCallExp" location="13:6-13:37" operationName="implies">
+                <source xsi:type="ocl:OperatorCallExp" location="13:6-13:12" operationName="&lt;>">
+                  <source xsi:type="ocl:VariableExp" location="13:6-13:8" referredVariable="/0/@elements.0/@definition/@feature/@body/@iterators.0"/>
+                  <arguments xsi:type="ocl:VariableExp" location="13:10-13:12" referredVariable="/0/@elements.0/@definition/@feature/@body/@body/@iterators.0"/>
                 </source>
-                <body xsi:type="ocl:OperatorCallExp" location="13:6-13:37" operationName="implies">
-                  <source xsi:type="ocl:OperatorCallExp" location="13:6-13:12" operationName="&lt;>">
-                    <source xsi:type="ocl:VariableExp" location="13:6-13:8" referredVariable="/0/@elements.0/@definition/@feature/@body/@arguments.0/@iterators.0"/>
-                    <arguments xsi:type="ocl:VariableExp" location="13:10-13:12" referredVariable="/0/@elements.0/@definition/@feature/@body/@arguments.0/@body/@iterators.0"/>
+                <arguments xsi:type="ocl:OperatorCallExp" location="13:21-13:37" operationName="&lt;>">
+                  <source xsi:type="ocl:NavigationOrAttributeCallExp" location="13:21-13:28" name="name">
+                    <source xsi:type="ocl:VariableExp" location="13:21-13:23" referredVariable="/0/@elements.0/@definition/@feature/@body/@iterators.0"/>
                   </source>
-                  <arguments xsi:type="ocl:OperatorCallExp" location="13:21-13:37" operationName="&lt;>">
-                    <source xsi:type="ocl:NavigationOrAttributeCallExp" location="13:21-13:28" name="name">
-                      <source xsi:type="ocl:VariableExp" location="13:21-13:23" referredVariable="/0/@elements.0/@definition/@feature/@body/@arguments.0/@iterators.0"/>
-                    </source>
-                    <arguments xsi:type="ocl:NavigationOrAttributeCallExp" location="13:30-13:37" name="name">
-                      <source xsi:type="ocl:VariableExp" location="13:30-13:32" referredVariable="/0/@elements.0/@definition/@feature/@body/@arguments.0/@body/@iterators.0"/>
-                    </arguments>
+                  <arguments xsi:type="ocl:NavigationOrAttributeCallExp" location="13:30-13:37" name="name">
+                    <source xsi:type="ocl:VariableExp" location="13:30-13:32" referredVariable="/0/@elements.0/@definition/@feature/@body/@body/@iterators.0"/>
                   </arguments>
-                </body>
-                <iterators location="12:44-12:46" varName="s2" variableExp="/0/@elements.0/@definition/@feature/@body/@arguments.0/@body/@body/@source/@arguments.0 /0/@elements.0/@definition/@feature/@body/@arguments.0/@body/@body/@arguments.0/@arguments.0/@source"/>
+                </arguments>
               </body>
-              <iterators location="11:56-11:58" varName="s1" variableExp="/0/@elements.0/@definition/@feature/@body/@arguments.0/@body/@body/@source/@source /0/@elements.0/@definition/@feature/@body/@arguments.0/@body/@body/@arguments.0/@source/@source"/>
-            </arguments>
+              <iterators location="12:44-12:46" varName="s2" variableExp="/0/@elements.0/@definition/@feature/@body/@body/@body/@source/@arguments.0 /0/@elements.0/@definition/@feature/@body/@body/@body/@arguments.0/@arguments.0/@source"/>
+            </body>
+            <iterators location="11:42-11:44" varName="s1" variableExp="/0/@elements.0/@definition/@feature/@body/@body/@body/@source/@source /0/@elements.0/@definition/@feature/@body/@body/@body/@arguments.0/@source/@source"/>
           </body>
         </feature>
         <context_ location="10:8-10:32">
@@ -48,6 +46,6 @@
       </definition>
     </elements>
   </atl:Module>
-  <ocl:OclModel location="3:14-3:17" name="FSM" elements="/0/@elements.0/@definition/@context_/@context_ /0/@elements.0/@definition/@feature/@body/@arguments.0/@source/@source /0/@elements.0/@definition/@feature/@body/@arguments.0/@body/@source/@source" model="/0/@outModels.0"/>
+  <ocl:OclModel location="3:14-3:17" name="FSM" elements="/0/@elements.0/@definition/@context_/@context_ /0/@elements.0/@definition/@feature/@body/@source/@source /0/@elements.0/@definition/@feature/@body/@body/@source/@source" model="/0/@outModels.0"/>
   <ocl:OclModel location="3:28-3:31" name="HSM" model="/0/@inModels.0"/>
 </xmi:XMI>

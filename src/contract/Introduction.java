@@ -1,6 +1,7 @@
 package contract;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import org.eclipse.m2m.atl.common.OCL.*;
 import org.eclipse.m2m.atl.emftvm.ExecEnv;
 
 import Ocl.TypeInference;
+import datastructure.ContextNature;
 import datastructure.Node;
 import datastructure.ProveOption;
 import datastructure.Tactic;
@@ -32,7 +34,9 @@ public class Introduction extends OperatorCallExp {
 	
 	static ArrayList<Node> tree = new ArrayList<Node>();
 	
-	static private String NATURE_ASSUME = "assumption";
+
+	
+	
 	
 	static private OCLFactory make = OCLFactory.init();
 	
@@ -46,7 +50,7 @@ public class Introduction extends OperatorCallExp {
 		return rtn;
 	}
 
-	static void introduction(OclExpression expr, HashMap<EObject, String> Inferred, int depth, ProveOption op) {
+	static void introduction(OclExpression expr, HashMap<EObject, ContextNature> Inferred, int depth, ProveOption op) {
 		
 		if (expr instanceof IteratorExp) {
 			IteratorExp todo = (IteratorExp) expr;
@@ -59,46 +63,48 @@ public class Introduction extends OperatorCallExp {
 		
 	}
 
-	static void _introduction(IteratorExp expr, HashMap<EObject, String> Inferred, int depth, ProveOption op) {
+	static void _introduction(IteratorExp expr, HashMap<EObject, ContextNature> Inferred, int depth, ProveOption op) {
 
 		Iterator bv = expr.getIterators().get(0);
 		OclExpression loopBody = expr.getBody();
 		OclExpression loopSrc = expr.getSource();
 		String bvType = TypeInference.infer(loopSrc);
 
-		System.out.print(indent(depth));
 
 		
 		if (expr.getName().toLowerCase().equals("forall")) {		
-			// rewrite: forall(bv, bv in col ==> body) <==> 
-			for (String rule : trace.get(bvType)) {
-				// infer construction
-				HashMap<EObject, String> newInferred = new HashMap<EObject, String>(Inferred);
-				newInferred.put(bv, NATURE_ASSUME);
 
-				// add to the prove tree
-				Node n = new Node(depth + 1, loopBody, expr, newInferred, ProveOption.EACH, Tactic.FORALL_INTRO);
-				tree.add(n);
-				
-				// introduction further
-				introduction(loopBody, newInferred, depth + 1, ProveOption.EACH);
+			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
+			inferNextLv.put(bv, ContextNature.BV);
+			
+			Node n = new Node(depth + 1, loopBody, expr, inferNextLv, ProveOption.EACH, Tactic.FORALL_INTRO);
+			tree.add(n);
+			
+			introduction(loopBody, inferNextLv, depth + 1, ProveOption.EACH);
+			
 
-			}
-
-		}
+		}else if (expr.getName().toLowerCase().equals("exists")) {	
+			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
+			inferNextLv.put(bv, ContextNature.BV);
+			
+			Node n = new Node(depth + 1, loopBody, expr, inferNextLv, ProveOption.ANY, Tactic.EXISTS_INTRO);
+			tree.add(n);
+			
+			introduction(loopBody, inferNextLv, depth + 1, ProveOption.ANY);
+		}	
 
 		
 		
 	}
 	
-	static void _introduction(OperatorCallExp expr, HashMap<EObject, String> Inferred, int depth, ProveOption op){
+	static void _introduction(OperatorCallExp expr, HashMap<EObject, ContextNature> Inferred, int depth, ProveOption op){
 		
 		if(expr.getOperationName().equals("implies")){
 			
 			OclExpression rhs = expr.getArguments().get(0);
 			
-			HashMap<EObject, String> inferNextLv = new HashMap<EObject, String>(Inferred);
-			inferNextLv.put(expr.getSource(), NATURE_ASSUME);
+			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
+			inferNextLv.put(expr.getSource(), ContextNature.ASSUME);
 			
 			Node n = new Node(depth + 1, rhs, expr, inferNextLv, op, Tactic.IMPLY_INTRO);
 			tree.add(n);
@@ -133,8 +139,8 @@ public class Introduction extends OperatorCallExp {
 			BooleanExp bFalse = make.createBooleanExp();
 			bFalse.setBooleanSymbol(false);
 			
-			HashMap<EObject, String> inferNextLv = new HashMap<EObject, String>(Inferred);
-			inferNextLv.put(src, NATURE_ASSUME);
+			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
+			inferNextLv.put(src, ContextNature.ASSUME);
 			
 			Node n1 = new Node(depth + 1, bFalse, expr, inferNextLv, op, Tactic.NEG_INTRO);
 			tree.add(n1);
@@ -158,11 +164,19 @@ public class Introduction extends OperatorCallExp {
 		List<OclExpression> postconditions = ContractLoader.init("HSM2FSM/Source/ContractSRC/HSM2FSMContract.atl");
 
 		for (OclExpression post : postconditions) {
-			HashMap<EObject, String> emptyTrace = new HashMap<EObject, String>();
+			HashMap<EObject, ContextNature> emptyTrace = new HashMap<EObject, ContextNature>();
 			Node root = new Node(0, post, null, emptyTrace, null, null);
 			tree.add(root);
 			introduction(post, emptyTrace, 0, ProveOption.EACH);	//TODO, default prove option
 		}
 
+		// print tree
+		Collections.sort(tree);
+		for(Node n : tree){
+			System.out.println(n.toString());
+		}
+		
+		
+		
 	}
 }
