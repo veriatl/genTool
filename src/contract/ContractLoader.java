@@ -25,8 +25,8 @@ public class ContractLoader {
 		AtlParser atlParser = AtlParser.getDefault();
 		IModel m = atlParser.parseToModel(input);
 		
-		//IExtractor extractor = new EMFExtractor();
-		//extractor.extract(m, contractPath+".xmi");
+		IExtractor extractor = new EMFExtractor();
+		extractor.extract(m, contractPath+".xmi");
 		
 		ArrayList<OclExpression> rtn = new ArrayList<OclExpression>();
 		

@@ -1,7 +1,10 @@
 package datastructure;
 
 public enum Tactic {
-	FORALL_INTRO_DECOMPOSE,
+	FORALL_INTRO,
 	IMPLY_INTRO,
-	AND_LEFT
+	OR_LEFT,
+	OR_RIGHT,
+	SPLIT,
+	NEG_INTRO,
 }
