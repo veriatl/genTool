@@ -5,6 +5,8 @@ import java.util.HashMap;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.m2m.atl.common.OCL.*;
 
+import Ocl.Printer;
+
 
 
 public class Node implements Comparable {
@@ -41,6 +43,6 @@ public class Node implements Comparable {
 	@Override
 	public String toString() {
 		
-		return String.format("Lv: %d, ctx: %s, applied %s", level, context.toString(), ruleApplied);
+		return String.format("Lv: %d, expr: %s, applied %s", level, Printer.print(content), ruleApplied);
 	}
 }

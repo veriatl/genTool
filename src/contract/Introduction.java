@@ -76,6 +76,9 @@ public class Introduction extends OperatorCallExp {
 
 			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
 			inferNextLv.put(bv, ContextNature.BV);
+			// bv in col needs to be in the context
+			
+			
 			
 			Node n = new Node(depth + 1, loopBody, expr, inferNextLv, ProveOption.EACH, Tactic.FORALL_INTRO);
 			tree.add(n);
@@ -86,6 +89,8 @@ public class Introduction extends OperatorCallExp {
 		}else if (expr.getName().toLowerCase().equals("exists")) {	
 			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
 			inferNextLv.put(bv, ContextNature.BV);
+			// bv in col needs to be in the context
+			
 			
 			Node n = new Node(depth + 1, loopBody, expr, inferNextLv, ProveOption.ANY, Tactic.EXISTS_INTRO);
 			tree.add(n);
