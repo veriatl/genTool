@@ -4,16 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.emf.common.util.URI;
-import org.eclipse.emf.ecore.EClass;
-import org.eclipse.emf.ecore.EClassifier;
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.emf.ecore.*;
 import org.eclipse.emf.ecore.resource.Resource;
 import org.eclipse.emf.ecore.resource.ResourceSet;
 import org.eclipse.emf.ecore.resource.impl.ResourceSetImpl;
 import org.eclipse.emf.ecore.xmi.impl.EcoreResourceFactoryImpl;
 import org.eclipse.m2m.atl.emftvm.EmftvmFactory;
 import org.eclipse.m2m.atl.emftvm.Metamodel;
+
+import keywords.Keyword;
 
 public class EMFLoader {
 
@@ -36,7 +35,7 @@ public class EMFLoader {
 
 	}
 
-	public static Map<String, String> readParantInfo(EPackage mm) throws Exception {
+	public static Map<String, String> readParantInfo(EPackage mm)  {
 
 		Map<String, String> info = new HashMap<String, String>();
 
@@ -59,7 +58,7 @@ public class EMFLoader {
 		return info;
 	}
 
-	public static boolean isSubtype(String sub, String sup, EPackage tarmm) throws Exception {
+	public static boolean isSubtype(String sub, String sup, EPackage tarmm)  {
 		Map<String, String> inheirtence = readParantInfo(tarmm);
 
 		if (!inheirtence.containsKey(sub)) {
@@ -70,4 +69,28 @@ public class EMFLoader {
 
 	}
 
+	public static String getStructuralFeatureType(String tp, String attr, EPackage mm)  {
+		
+		String rtn = "unknown";
+		
+		for (EClassifier cl : mm.getEClassifiers()) {
+
+			if (cl instanceof EClass) {
+				EClass clazz = (EClass) cl;
+				String qualifiedClazz =  mm.getName() + "$" + clazz.getName();
+				if (qualifiedClazz.equals(tp)) {
+					EStructuralFeature sf = clazz.getEStructuralFeature(attr);
+					rtn = sf.getEType().getName();
+					
+					if(sf.getUpperBound()==-1){
+						rtn = Keyword.TYPE_COL+rtn;
+					}
+					
+				}
+			}
+		}
+		return rtn;
+
+	}
+	
 }

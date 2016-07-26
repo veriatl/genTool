@@ -14,10 +14,13 @@ import org.eclipse.m2m.atl.common.OCL.*;
 import org.eclipse.m2m.atl.emftvm.ExecEnv;
 
 import Ocl.TypeInference;
+import datastructure.ContextEntry;
 import datastructure.ContextNature;
 import datastructure.Node;
+import datastructure.NodeHelper;
 import datastructure.ProveOption;
 import datastructure.Tactic;
+import keywords.Keyword;
 import metamodel.EMFLoader;
 import transformation.Trace;
 
@@ -34,7 +37,7 @@ public class Introduction extends OperatorCallExp {
 	
 	static ArrayList<Node> tree = new ArrayList<Node>();
 	
-
+	static EPackage tarmm;
 	
 	
 	
@@ -50,7 +53,7 @@ public class Introduction extends OperatorCallExp {
 		return rtn;
 	}
 
-	static void introduction(OclExpression expr, HashMap<EObject, ContextNature> Inferred, int depth, ProveOption op) {
+	static void introduction(OclExpression expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op) {
 		
 		if (expr instanceof IteratorExp) {
 			IteratorExp todo = (IteratorExp) expr;
@@ -63,22 +66,27 @@ public class Introduction extends OperatorCallExp {
 		
 	}
 
-	static void _introduction(IteratorExp expr, HashMap<EObject, ContextNature> Inferred, int depth, ProveOption op) {
+	static void _introduction(IteratorExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op) {
 
 		Iterator bv = expr.getIterators().get(0);
 		OclExpression loopBody = expr.getBody();
 		OclExpression loopSrc = expr.getSource();
-		String bvType = TypeInference.infer(loopSrc);
+		String bvType = TypeInference.infer(loopSrc,tarmm);
 
 
 		
 		if (expr.getName().toLowerCase().equals("forall")) {		
+			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
+			inferNextLv.put(bv, new ContextEntry(ContextNature.BV));
 
-			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
-			inferNextLv.put(bv, ContextNature.BV);
-			// bv in col needs to be in the context
-			
-			
+			// bv in src
+			OperationCallExp inclusion = make.createOperationCallExp();
+			inclusion.setOperationName("includes");
+			inclusion.setSource(EcoreUtil.copy(loopSrc));
+			VariableExp var = make.createVariableExp();
+			var.setReferredVariable(EcoreUtil.copy(bv));
+			inclusion.getArguments().add(var);
+			inferNextLv.put(inclusion, new ContextEntry(ContextNature.ASSUME));
 			
 			Node n = new Node(depth + 1, loopBody, expr, inferNextLv, ProveOption.EACH, Tactic.FORALL_INTRO);
 			tree.add(n);
@@ -87,29 +95,31 @@ public class Introduction extends OperatorCallExp {
 			
 
 		}else if (expr.getName().toLowerCase().equals("exists")) {	
-			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
-			inferNextLv.put(bv, ContextNature.BV);
-			// bv in col needs to be in the context
-			
-			
-			Node n = new Node(depth + 1, loopBody, expr, inferNextLv, ProveOption.ANY, Tactic.EXISTS_INTRO);
-			tree.add(n);
-			
-			introduction(loopBody, inferNextLv, depth + 1, ProveOption.ANY);
+
 		}	
 
 		
 		
 	}
 	
-	static void _introduction(OperatorCallExp expr, HashMap<EObject, ContextNature> Inferred, int depth, ProveOption op){
+	static void _introduction(NavigationOrAttributeCallExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op){	
+		// identify single valued navigation
+		String tp = TypeInference.infer(expr,tarmm);
+		
+		if(!tp.startsWith(Keyword.TYPE_COL) && !TypeInference.isPrimitive(tp)){
+			
+		}
+		
+	}
+	
+	static void _introduction(OperatorCallExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op){
 		
 		if(expr.getOperationName().equals("implies")){
 			
 			OclExpression rhs = expr.getArguments().get(0);
 			
-			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
-			inferNextLv.put(expr.getSource(), ContextNature.ASSUME);
+			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
+			inferNextLv.put(expr.getSource(), new ContextEntry(ContextNature.ASSUME));
 			
 			Node n = new Node(depth + 1, rhs, expr, inferNextLv, op, Tactic.IMPLY_INTRO);
 			tree.add(n);
@@ -144,8 +154,8 @@ public class Introduction extends OperatorCallExp {
 			BooleanExp bFalse = make.createBooleanExp();
 			bFalse.setBooleanSymbol(false);
 			
-			HashMap<EObject, ContextNature> inferNextLv = new HashMap<EObject, ContextNature>(Inferred);
-			inferNextLv.put(src, ContextNature.ASSUME);
+			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
+			inferNextLv.put(src, new ContextEntry(ContextNature.ASSUME));
 			
 			Node n1 = new Node(depth + 1, bFalse, expr, inferNextLv, op, Tactic.NEG_INTRO);
 			tree.add(n1);
@@ -163,13 +173,13 @@ public class Introduction extends OperatorCallExp {
 
 	public static void main(String[] args) throws Exception {
 		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
-		EPackage tarmm = EMFLoader.loadEcore(args[3]);
+		tarmm = EMFLoader.loadEcore(args[3]);
 		trace = Trace.getTrace(tarmm, env);
 
 		List<OclExpression> postconditions = ContractLoader.init("HSM2FSM/Source/ContractSRC/HSM2FSMContract.atl");
 
 		for (OclExpression post : postconditions) {
-			HashMap<EObject, ContextNature> emptyTrace = new HashMap<EObject, ContextNature>();
+			HashMap<EObject, ContextEntry> emptyTrace = new HashMap<EObject, ContextEntry>();
 			Node root = new Node(0, post, null, emptyTrace, null, null);
 			tree.add(root);
 			introduction(post, emptyTrace, 0, ProveOption.EACH);	//TODO, default prove option
@@ -181,7 +191,7 @@ public class Introduction extends OperatorCallExp {
 			System.out.println(n.toString());
 		}
 		
-		
+		System.out.println(NodeHelper.findLeafs(tree).toString());
 		
 	}
 }

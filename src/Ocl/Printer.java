@@ -6,7 +6,7 @@ import org.eclipse.emf.ecore.EObject;
 import org.eclipse.m2m.atl.common.OCL.*;
 
 
-import datastructure.ContextNature;
+import datastructure.ContextEntry;
 import datastructure.Node;
 import datastructure.ProveOption;
 import datastructure.Tactic;
@@ -48,7 +48,7 @@ public class Printer {
 		Iterator bv = expr.getIterators().get(0);
 		OclExpression loopBody = expr.getBody();
 		OclExpression loopSrc = expr.getSource();
-		String bvType = TypeInference.infer(loopSrc);
+
 
 
 		
