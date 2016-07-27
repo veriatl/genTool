@@ -43,15 +43,8 @@ public class Introduction extends OperatorCallExp {
 	
 	static private OCLFactory make = OCLFactory.init();
 	
-	//static OCLFactory make = OCLFactory.init();
 
-	static String indent(int depth) {
-		String rtn = "";
-		for (int i = 0; i < depth; i++) {
-			rtn += "\t";
-		}
-		return rtn;
-	}
+
 
 	static void introduction(OclExpression expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op) {
 		
@@ -191,7 +184,26 @@ public class Introduction extends OperatorCallExp {
 			System.out.println(n.toString());
 		}
 		
-		System.out.println(NodeHelper.findLeafs(tree).toString());
+	
+		while(!Elimination.terminated(NodeHelper.findLeafs(tree))){
+			ArrayList<Node> leafs = NodeHelper.findLeafs(tree);
+			
+			for(Node n : leafs){
+				HashMap<EObject, ContextEntry> ctx = n.getContext();
+				for(EObject ocl : ctx.keySet()){
+					if(ctx.get(ocl).isEliminated()){
+						continue;
+					}else{
+						Elimination.elimin(ocl);
+						ctx.get(ocl).setEliminated(true);
+						break;
+					}
+				}
+			}
+		}
+		
+		
+		
 		
 	}
 }

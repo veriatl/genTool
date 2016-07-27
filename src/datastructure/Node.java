@@ -28,6 +28,22 @@ public class Node implements Comparable {
 		this.ruleApplied = rule;
 	}
 
+	public OclExpression getContent() {
+		return content;
+	}
+
+	public void setContent(OclExpression content) {
+		this.content = content;
+	}
+
+	public HashMap<EObject, ContextEntry> getContext() {
+		return context;
+	}
+
+	public void setContext(HashMap<EObject, ContextEntry> context) {
+		this.context = context;
+	}
+	
 	@Override
 	public int compareTo(Object other) {
 		

@@ -13,6 +13,14 @@ import datastructure.Tactic;
 
 public class Printer {
 
+	static String indent(int depth) {
+		String rtn = "";
+		for (int i = 0; i < depth; i++) {
+			rtn += "\t";
+		}
+		return rtn;
+	}
+	
 	public static String print(OclExpression expr){
 		String rtn = "Unknown";
 		
