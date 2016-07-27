@@ -1,9 +1,10 @@
 package datastructure;
 
+import org.eclipse.emf.ecore.EObject;
 
+import Ocl.Printer;
 
-
-public class ContextEntry {
+public class ContextEntry  {
 
 	ContextNature n;
 	boolean eliminated;
@@ -23,6 +24,10 @@ public class ContextEntry {
 		this.eliminated = eliminated;
 	}
 
+	public String toString() {
+		return String.format("%s", n.toString());
+	}
 	
+
 }
 

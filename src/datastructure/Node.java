@@ -28,6 +28,38 @@ public class Node implements Comparable {
 		this.ruleApplied = rule;
 	}
 
+	public int getLevel() {
+		return level;
+	}
+
+	public void setLevel(int level) {
+		this.level = level;
+	}
+
+	public OclExpression getParent() {
+		return parent;
+	}
+
+	public void setParent(OclExpression parent) {
+		this.parent = parent;
+	}
+
+	public ProveOption getRel2Parent() {
+		return rel2Parent;
+	}
+
+	public void setRel2Parent(ProveOption rel2Parent) {
+		this.rel2Parent = rel2Parent;
+	}
+
+	public Tactic getRuleApplied() {
+		return ruleApplied;
+	}
+
+	public void setRuleApplied(Tactic ruleApplied) {
+		this.ruleApplied = ruleApplied;
+	}
+	
 	public OclExpression getContent() {
 		return content;
 	}
@@ -58,7 +90,12 @@ public class Node implements Comparable {
 	
 	@Override
 	public String toString() {
+		String ctx = "";
 		
-		return String.format("Lv: %d, expr: %s, applied %s", level, Printer.print(content), ruleApplied);
+		for(EObject entry : this.context.keySet()){
+			ctx += String.format("%s \t *%s* , \n",  Printer.print(entry), this.context.get(entry));
+		}
+		
+		return String.format("Lv: %d, ctx: [%s], expr: %s, applied %s", level, ctx, Printer.print(content), ruleApplied);
 	}
 }

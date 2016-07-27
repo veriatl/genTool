@@ -10,6 +10,7 @@ import datastructure.ContextEntry;
 import datastructure.Node;
 import datastructure.ProveOption;
 import datastructure.Tactic;
+import keywords.Keyword;
 
 public class Printer {
 
@@ -21,8 +22,8 @@ public class Printer {
 		return rtn;
 	}
 	
-	public static String print(OclExpression expr){
-		String rtn = "Unknown";
+	public static String print(EObject expr){
+		String rtn = Keyword.TYPE_UNKNOWN;
 		
 		if(expr == null){
 			return rtn;
@@ -46,13 +47,19 @@ public class Printer {
 		}else if (expr instanceof NavigationOrAttributeCallExp){
 			NavigationOrAttributeCallExp todo = (NavigationOrAttributeCallExp)expr;
 			rtn = _print(todo);
+		}else if (expr instanceof Iterator){
+			Iterator todo = (Iterator)expr;
+			rtn = _print(todo);
+		}else if (expr instanceof StringExp){
+			StringExp todo = (StringExp) expr;
+			rtn = _print(todo);
 		}
 		
 		return rtn;
 	}
 	
 	static String _print(IteratorExp expr) {
-		String rtn = "Unknown";
+		String rtn = Keyword.TYPE_UNKNOWN;
 		Iterator bv = expr.getIterators().get(0);
 		OclExpression loopBody = expr.getBody();
 		OclExpression loopSrc = expr.getSource();
@@ -71,7 +78,7 @@ public class Printer {
 	}
 	
 	static String _print(OperatorCallExp expr){
-		String rtn = "Unknown";
+		String rtn = Keyword.TYPE_UNKNOWN;
 		if(expr.getOperationName().equals("implies")){
 			OclExpression lhs = expr.getSource();
 			OclExpression rhs = expr.getArguments().get(0);
@@ -86,10 +93,15 @@ public class Printer {
 				
 		}else if(expr.getOperationName().equals("or")){
 			OclExpression lhs = expr.getSource();
-			OclExpression rhs = expr.getArguments().get(0);
-			
-			rtn = String.format("%s or %s", print(lhs), print(rhs));	
-			
+			rtn = print(lhs);		
+			if(expr.getArguments().size() > 0){
+				for(OclExpression rhs: expr.getArguments()){
+					rtn += String.format(" or %s", print(rhs));	
+				}
+			}else{
+				rtn += " or false";
+			}
+	
 		}else if(expr.getOperationName().equals("not")){
 			OclExpression src = expr.getSource();
 
@@ -109,28 +121,56 @@ public class Printer {
 	}
 	
 	public static String _print(OperationCallExp expr){
-		String rtn = "Unkown";
+		String rtn = Keyword.TYPE_UNKNOWN;
 		if(expr.getOperationName().equals("allInstances")){
 			OclExpression src = expr.getSource();
 			rtn =  String.format("%s->allInstances()", print(src));
+		}else if(expr.getOperationName().equals("includes")){
+			OclExpression col = expr.getSource();
+			OclExpression src = expr.getArguments().get(0);
+			rtn = String.format("%s in %s", print(src), print(col));
+		}else if(expr.getOperationName().equals("genBy")){
+			OclExpression src = expr.getSource();
+			OclExpression rl = expr.getArguments().get(0);
+			rtn = String.format("%s genBy %s", print(src), print(rl));
 		}
 		return rtn;
 	}
 	
-	public static String _print(OclModelElement expr){		
-		String rtn = String.format("%s$%s", expr.getModel().getName(),expr.getName());	
+	public static String _print(OclModelElement expr){	
+		String rtn = Keyword.TYPE_UNKNOWN;
+		if(expr.getModel()!=null){
+			rtn = String.format("%s$%s", expr.getModel().getName(),expr.getName());
+		}else{
+			rtn = String.format("%s", expr.getName());
+		}
+			
 		return rtn;
 	}
 
 	
 	public static String _print(VariableExp expr){		
-		String rtn = String.format("%s", expr.getReferredVariable().getVarName());	
+		String rtn = Keyword.TYPE_UNKNOWN;
+		if(expr.getReferredVariable()!=null){
+			rtn = String.format("%s", expr.getReferredVariable().getVarName());	
+		}else{
+			rtn = String.format("%s", "VariableExp_Unknown");
+		}
 		return rtn;
 	}
 	
 	public static String _print(NavigationOrAttributeCallExp expr){		
 		String rtn = String.format("%s.%s", print(expr.getSource()), expr.getName());	
 		return rtn;
+	}
+	
+	public static String _print(StringExp expr){
+		return expr.getStringSymbol();
+	}
+	
+	
+	public static String _print(Iterator expr){
+		return expr.getVarName();
 	}
 	
 	public static void main(String[] args) {

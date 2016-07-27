@@ -31,28 +31,33 @@ import transformation.Trace;
 
 
 
-public class Introduction extends OperatorCallExp {
+public class Introduction  {
 
+	static ExecEnv env;
 	static Map<String, ArrayList<String>> trace;
-	
 	static ArrayList<Node> tree = new ArrayList<Node>();
-	
 	static EPackage tarmm;
-	
-	
-	
 	static private OCLFactory make = OCLFactory.init();
 	
 
+	public static void init(ExecEnv e, Map<String, ArrayList<String>> t, ArrayList<Node> tr, EPackage mm){
+		env = e;
+		trace = t;
+		tree =tr;
+		tarmm = mm;
+	}
 
 
-	static void introduction(OclExpression expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op) {
+	public static void introduction(OclExpression expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op) {
 		
 		if (expr instanceof IteratorExp) {
 			IteratorExp todo = (IteratorExp) expr;
 			_introduction(todo, Inferred, depth, op);
 		}else if(expr instanceof OperatorCallExp){
 			OperatorCallExp todo = (OperatorCallExp) expr;
+			_introduction(todo, Inferred, depth, op);
+		}else if(expr instanceof NavigationOrAttributeCallExp){
+			NavigationOrAttributeCallExp todo = (NavigationOrAttributeCallExp) expr;
 			_introduction(todo, Inferred, depth, op);
 		}
 		
@@ -64,7 +69,7 @@ public class Introduction extends OperatorCallExp {
 		Iterator bv = expr.getIterators().get(0);
 		OclExpression loopBody = expr.getBody();
 		OclExpression loopSrc = expr.getSource();
-		String bvType = TypeInference.infer(loopSrc,tarmm);
+		
 
 
 		
@@ -75,7 +80,14 @@ public class Introduction extends OperatorCallExp {
 			// bv in src
 			OperationCallExp inclusion = make.createOperationCallExp();
 			inclusion.setOperationName("includes");
-			inclusion.setSource(EcoreUtil.copy(loopSrc));
+			
+			EcoreUtil.Copier cpy = new EcoreUtil.Copier();
+			EObject tempSrc = cpy.copy(loopSrc);
+			cpy.copyReferences();
+			if(tempSrc instanceof OclExpression){
+				inclusion.setSource((OclExpression)tempSrc);
+			}
+			
 			VariableExp var = make.createVariableExp();
 			var.setReferredVariable(EcoreUtil.copy(bv));
 			inclusion.getArguments().add(var);
@@ -164,46 +176,5 @@ public class Introduction extends OperatorCallExp {
 	
 	
 
-	public static void main(String[] args) throws Exception {
-		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
-		tarmm = EMFLoader.loadEcore(args[3]);
-		trace = Trace.getTrace(tarmm, env);
-
-		List<OclExpression> postconditions = ContractLoader.init("HSM2FSM/Source/ContractSRC/HSM2FSMContract.atl");
-
-		for (OclExpression post : postconditions) {
-			HashMap<EObject, ContextEntry> emptyTrace = new HashMap<EObject, ContextEntry>();
-			Node root = new Node(0, post, null, emptyTrace, null, null);
-			tree.add(root);
-			introduction(post, emptyTrace, 0, ProveOption.EACH);	//TODO, default prove option
-		}
-
-		// print tree
-		Collections.sort(tree);
-		for(Node n : tree){
-			System.out.println(n.toString());
-		}
-		
 	
-		while(!Elimination.terminated(NodeHelper.findLeafs(tree))){
-			ArrayList<Node> leafs = NodeHelper.findLeafs(tree);
-			
-			for(Node n : leafs){
-				HashMap<EObject, ContextEntry> ctx = n.getContext();
-				for(EObject ocl : ctx.keySet()){
-					if(ctx.get(ocl).isEliminated()){
-						continue;
-					}else{
-						Elimination.elimin(ocl);
-						ctx.get(ocl).setEliminated(true);
-						break;
-					}
-				}
-			}
-		}
-		
-		
-		
-		
-	}
 }
