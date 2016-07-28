@@ -21,6 +21,7 @@ import datastructure.NodeHelper;
 import datastructure.ProveOption;
 import datastructure.Tactic;
 import keywords.Keyword;
+import metamodel.EMFHelper;
 import metamodel.EMFLoader;
 import transformation.Trace;
 
@@ -89,7 +90,7 @@ public class Introduction  {
 			}
 			
 			VariableExp var = make.createVariableExp();
-			var.setReferredVariable(EcoreUtil.copy(bv));
+			var.setReferredVariable(EMFHelper.deepCopy(bv));
 			inclusion.getArguments().add(var);
 			inferNextLv.put(inclusion, new ContextEntry(ContextNature.ASSUME));
 			

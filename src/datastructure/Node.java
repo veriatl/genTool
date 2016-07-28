@@ -96,6 +96,6 @@ public class Node implements Comparable {
 			ctx += String.format("%s \t *%s* , \n",  Printer.print(entry), this.context.get(entry));
 		}
 		
-		return String.format("Lv: %d, ctx: [%s], expr: %s, applied %s", level, ctx, Printer.print(content), ruleApplied);
+		return String.format("Lv: %d, \nctx: [%s], \n===\nGoal: %s, \napplied %s", level, ctx, Printer.print(content), ruleApplied);
 	}
 }
