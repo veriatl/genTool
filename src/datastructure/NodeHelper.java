@@ -21,7 +21,7 @@ public class NodeHelper {
 		
 		for(Node n : tree){
 			if(n.parent != null){
-				nonLeafs.add(findParent(tree, n));
+				nonLeafs.add(n.parent);
 			}
 		}
 		
@@ -36,15 +36,5 @@ public class NodeHelper {
 	}
 	
 	
-	public static Node findParent(ArrayList<Node> tree, Node t){
-		
-		for(Node n : tree){
-			if(n == t.parent){
-				return n;
-			}
-		}
-		
-		return null;		
-		
-	}
+
 }

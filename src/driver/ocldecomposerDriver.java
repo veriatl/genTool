@@ -27,6 +27,8 @@ public class ocldecomposerDriver {
 	
 	// Notice: Termination of this strategy depends on what rules are selected, e.g. if inclusion elimin 1 and 2 are both presented, of course it will loop forever
 	// it also depends on whether a fixpoint can be reached at each stage.
+	
+	// the limitation of this strategy is that it doesn't handle well if eliminate triggers new introduction, which is we trying to avoid because of mutual recursive call.
 	public static void main(String[] args) throws Exception {
 		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
 		EPackage tarmm = EMFLoader.loadEcore(args[3]);
@@ -84,7 +86,7 @@ public class ocldecomposerDriver {
 		
 		// print tree
 		Collections.sort(tree);
-		for(Node n : NodeHelper.findLeafs(tree)){
+		for(Node n : tree){
 			System.out.println(n.toString());
 			System.out.println("===");
 		}

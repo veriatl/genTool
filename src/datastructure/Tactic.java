@@ -13,5 +13,6 @@ public enum Tactic {
 	OR_ELIM,
 	AND_ELIM,
 	IMPLY_ELIM,
-	NEG_ELIM,
+	NEG_ELIM, 
+	NAV_SINGLE_INTRO,
 }

@@ -13,6 +13,8 @@ import org.eclipse.m2m.atl.common.OCL.*;
 
 import org.eclipse.m2m.atl.emftvm.ExecEnv;
 
+import Ocl.OclHelper;
+import Ocl.Printer;
 import Ocl.TypeInference;
 import datastructure.ContextEntry;
 import datastructure.ContextNature;
@@ -57,8 +59,8 @@ public class Introduction  {
 		}else if(expr instanceof OperatorCallExp){
 			OperatorCallExp todo = (OperatorCallExp) expr;
 			_introduction(n, todo, Inferred, depth, op);
-		}else if(expr instanceof NavigationOrAttributeCallExp){
-			NavigationOrAttributeCallExp todo = (NavigationOrAttributeCallExp) expr;
+		}else if(expr instanceof OperationCallExp){
+			OperationCallExp todo = (OperationCallExp) expr;
 			_introduction(n, todo, Inferred, depth, op);
 		}
 		
@@ -78,6 +80,10 @@ public class Introduction  {
 			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
 			inferNextLv.put(bv, new ContextEntry(ContextNature.BV));
 
+			String bvType = TypeInference.getElemType(TypeInference.infer(loopSrc, tarmm));
+			TypeInference.lookup.put(Printer.print(bv), bvType);
+			
+			
 			// bv in src
 			OperationCallExp inclusion = make.createOperationCallExp();
 			inclusion.setOperationName("includes");
@@ -101,12 +107,49 @@ public class Introduction  {
 		
 	}
 	
-	static void _introduction(Node n, NavigationOrAttributeCallExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op){	
-		// identify single valued navigation
-		String tp = TypeInference.infer(expr,tarmm);
+	static void _introduction(Node n, OperationCallExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op){	
 		
-		if(!tp.startsWith(Keyword.TYPE_COL) && !TypeInference.isPrimitive(tp)){
+		OclExpression src = expr.getSource();
+		
+		if(src instanceof NavigationOrAttributeCallExp){
+			// identify single valued navigation
+			String tp = TypeInference.infer(src, tarmm);
+
 			
+			if(!tp.startsWith(Keyword.TYPE_COL) && !TypeInference.isPrimitive(tp)){
+				
+				OperationCallExp col = make.createCollectionOperationCallExp();
+				col.setOperationName("allInstances");
+				OclModelElement m = make.createOclModelElement();
+				m.setName(tp);
+				col.setSource(m);
+				
+				OperationCallExp includes = make.createOperationCallExp();
+				includes.setOperationName("includes");
+				includes.setSource(EMFHelper.deepCopy(col));
+				includes.getArguments().add(EMFHelper.deepCopy(src));
+				
+				OperationCallExp excludes = make.createOperationCallExp();
+				excludes.setOperationName("excludes");
+				excludes.setSource(EMFHelper.deepCopy(col));
+				excludes.getArguments().add(EMFHelper.deepCopy(src));
+				
+				
+				if(!OclHelper.isMember(Inferred.keySet(), includes) && !OclHelper.isMember(Inferred.keySet(), excludes)){
+					HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
+					inferNextLv.put(includes, new ContextEntry(ContextNature.ASSUME));
+					Node n1 = new Node(depth + 1, expr, n, inferNextLv, ProveOption.EACH, Tactic.NAV_SINGLE_INTRO);
+					tree.add(n1);
+					
+					HashMap<EObject, ContextEntry> inferNextLv2 = new HashMap<EObject, ContextEntry>(Inferred);
+					inferNextLv2.put(excludes, new ContextEntry(ContextNature.ASSUME));
+					Node n2 = new Node(depth + 1, expr, n, inferNextLv2, ProveOption.EACH, Tactic.NAV_SINGLE_INTRO);
+					tree.add(n2);	
+				}
+					
+					
+
+			}
 		}
 		
 	}

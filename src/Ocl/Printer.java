@@ -129,10 +129,20 @@ public class Printer {
 			OclExpression col = expr.getSource();
 			OclExpression src = expr.getArguments().get(0);
 			rtn = String.format("%s in %s", print(src), print(col));
+		}else if(expr.getOperationName().equals("excludes")){
+			OclExpression col = expr.getSource();
+			OclExpression src = expr.getArguments().get(0);
+			rtn = String.format("%s not_in %s", print(src), print(col));
 		}else if(expr.getOperationName().equals("genBy")){
 			OclExpression src = expr.getSource();
 			OclExpression rl = expr.getArguments().get(0);
 			rtn = String.format("%s genBy %s", print(src), print(rl));
+		}else{
+			OclExpression src = expr.getSource();
+			rtn = String.format("%s applied on %s with args:", expr.getOperationName(), print(src));
+			for(OclExpression arg : expr.getArguments()){
+				rtn += print(arg);
+			}
 		}
 		return rtn;
 	}

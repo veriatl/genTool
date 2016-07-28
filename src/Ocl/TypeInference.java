@@ -1,5 +1,9 @@
 package Ocl;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.m2m.atl.common.OCL.*;
 
@@ -8,11 +12,16 @@ import metamodel.EMFLoader;
 
 public class TypeInference {
 
-	
+	public static Map<String, String> lookup = new HashMap<String, String>();
 
 	
-	public static String infer(OclExpression expr, EPackage mm){
+	public static String infer(EObject expr, EPackage mm){
 		String rtn = Keyword.TYPE_UNKNOWN;
+		
+		if(lookup.containsKey(Printer.print(expr))){
+			return lookup.get(Printer.print(expr));
+		}
+		
 		if(expr instanceof OperationCallExp){
 			OperationCallExp todo = (OperationCallExp) expr;
 			rtn = _infer(todo,mm);
@@ -22,6 +31,13 @@ public class TypeInference {
 		}else if(expr instanceof NavigationOrAttributeCallExp){
 			NavigationOrAttributeCallExp todo = (NavigationOrAttributeCallExp) expr;
 			rtn = _infer(todo,mm);
+		}else if(expr instanceof VariableExp){
+			VariableExp todo = (VariableExp) expr;
+			rtn = _infer(todo,mm);
+		}
+		
+		if(!rtn.equals(Keyword.TYPE_UNKNOWN)){
+			lookup.put(Printer.print(expr), rtn);
 		}
 		
 		return rtn;
@@ -52,12 +68,18 @@ public class TypeInference {
 	public static String _infer(NavigationOrAttributeCallExp expr, EPackage mm){
 		
 		String srcType = infer(expr.getSource(),mm);
-		
 		return EMFLoader.getStructuralFeatureType(srcType, expr.getName(),mm);
 		
 	}
 	
-	
+	public static String _infer(VariableExp expr, EPackage mm){
+		if(lookup.containsKey(Printer.print(expr))){
+			return lookup.get(Printer.print(expr));
+		}else{
+			return Keyword.TYPE_UNKNOWN;
+		}
+		
+	}
 	
 	public static boolean isPrimitive(String tp){
 		if(tp.equals("EInt") || tp.equals("EBoolean") || tp.equals("EString")){

@@ -24,6 +24,10 @@ public class EMFHelper {
 			_deepCopy((Iterator)rtn, (Iterator)e);
 		}else if(e instanceof VariableExp){
 			_deepCopy((VariableExp)rtn, (VariableExp)e);
+		}else if(e instanceof NavigationOrAttributeCallExp){
+			_deepCopy((NavigationOrAttributeCallExp)rtn, (NavigationOrAttributeCallExp)e);
+		}else if(e instanceof OperationCallExp){
+			_deepCopy((OperationCallExp)rtn, (OperationCallExp)e);
 		}
 		
 		
@@ -47,6 +51,16 @@ public class EMFHelper {
 		copy.setReferredVariable(var);
 	}
 	
+	private static void _deepCopy(NavigationOrAttributeCallExp copy, NavigationOrAttributeCallExp src){
+		OclExpression s = deepCopy(src.getSource());	
+		copy.setSource(s);
+	}
+
+	private static void _deepCopy(OperationCallExp copy, OperationCallExp src){
+		OclExpression s = deepCopy(src.getSource());	
+		copy.setSource(s);
+	}
+
 	/* Template
 	private static void _deepCopy(? copy, ? src){
 			

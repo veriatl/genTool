@@ -7,10 +7,8 @@ create OUT : FSM from IN : HSM;
 --POSTCONDITION FSM
 
 --@post
-helper context FSM!StateMachine def: unique_fsm_sm_names(): Boolean = -- different target state machines have different names
- FSM!AbstractState.allInstances()->forAll(s1 | 
-  	FSM!StateMachine.allInstances()->forAll(s2 | 
-  	  s1<>s2 implies s1.name<>s2.name));
+helper context FSM!Transition def: fsm_transition_src_multi_lower(): Boolean = -- a transition has at least one source
+  FSM!Transition.allInstances()->forAll(t | t.source.oclIsUndefined());
   
 
 
