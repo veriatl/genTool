@@ -39,7 +39,7 @@ public class NodeHelper {
 	public static Node findParent(ArrayList<Node> tree, Node t){
 		
 		for(Node n : tree){
-			if(n.content == t.parent && t.level == n.level + 1){
+			if(n == t.parent){
 				return n;
 			}
 		}

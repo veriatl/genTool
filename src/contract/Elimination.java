@@ -77,14 +77,14 @@ public class Elimination {
 			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(n.getContext());
 			inferNextLv.put(src, new ContextEntry(ContextNature.ASSUME));
 			
-			Node n1 = new Node(n.getLevel()+1, n.getContent(), n.getContent(), inferNextLv, n.getRel2Parent(), Tactic.OR_ELIM);
+			Node n1 = new Node(n.getLevel()+1, n.getContent(), n, inferNextLv, n.getRel2Parent(), Tactic.OR_ELIM);
 			tree.add(n1);
 			
 			for(OclExpression arg : args){
 				HashMap<EObject, ContextEntry> inferNextLv2 = new HashMap<EObject, ContextEntry>(n.getContext());
 				inferNextLv2.put(arg, new ContextEntry(ContextNature.ASSUME));
 				
-				Node nn = new Node(n.getLevel()+1, n.getContent(), n.getContent(), inferNextLv2, n.getRel2Parent(), Tactic.OR_ELIM);
+				Node nn = new Node(n.getLevel()+1, n.getContent(), n, inferNextLv2, n.getRel2Parent(), Tactic.OR_ELIM);
 				tree.add(nn);
 			}
 			
@@ -133,7 +133,7 @@ public class Elimination {
 				HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(n.getContext());
 				inferNextLv.put(or, new ContextEntry(ContextNature.INFER));
 				
-				Node newNode = new Node(n.getLevel() + 1, n.getContent(), n.getContent(), inferNextLv, n.getRel2Parent(), Tactic.INCLUDES_ELIM_2);
+				Node newNode = new Node(n.getLevel() + 1, n.getContent(), n, inferNextLv, n.getRel2Parent(), Tactic.INCLUDES_ELIM_2);
 				tree.add(newNode);
 				
 			}
@@ -176,7 +176,7 @@ public class Elimination {
 				HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(n.getContext());
 				inferNextLv.put(not, new ContextEntry(ContextNature.INFER));
 				
-				Node newNode = new Node(n.getLevel() + 1, n.getContent(), n.getContent(), inferNextLv, n.getRel2Parent(), Tactic.EXCLUDES_ELIM_2);
+				Node newNode = new Node(n.getLevel() + 1, n.getContent(), n, inferNextLv, n.getRel2Parent(), Tactic.EXCLUDES_ELIM_2);
 				tree.add(newNode);
 				
 			}

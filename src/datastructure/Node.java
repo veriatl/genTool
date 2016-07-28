@@ -14,12 +14,12 @@ public class Node implements Comparable {
 
 	int level;
 	OclExpression content;
-	OclExpression parent;
+	Node parent;
 	HashMap<EObject, ContextEntry> context;
 	ProveOption rel2Parent;
 	Tactic ruleApplied;
 	
-	public Node(int lv, OclExpression ct, OclExpression pt, HashMap<EObject, ContextEntry> ctx, ProveOption rel, Tactic rule){
+	public Node(int lv, OclExpression ct, Node pt, HashMap<EObject, ContextEntry> ctx, ProveOption rel, Tactic rule){
 		this.level = lv;
 		this.content = ct;
 		this.parent = pt;
@@ -36,11 +36,11 @@ public class Node implements Comparable {
 		this.level = level;
 	}
 
-	public OclExpression getParent() {
+	public Node getParent() {
 		return parent;
 	}
 
-	public void setParent(OclExpression parent) {
+	public void setParent(Node parent) {
 		this.parent = parent;
 	}
 

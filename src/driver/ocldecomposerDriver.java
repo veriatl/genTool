@@ -34,26 +34,47 @@ public class ocldecomposerDriver {
 			HashMap<EObject, ContextEntry> emptyTrace = new HashMap<EObject, ContextEntry>();
 			Node root = new Node(0, post, null, emptyTrace, null, null);
 			tree.add(root);
-			Introduction.introduction(post, emptyTrace, 0, ProveOption.EACH);	//TODO, default prove option
-		}
-		
-		Elimination.init(env, trace, tree, tarmm);
-		while(!Elimination.terminated(NodeHelper.findLeafs(tree))){
-			ArrayList<Node> leafs = NodeHelper.findLeafs(tree);
 			
-			for(Node n : leafs){
-				HashMap<EObject, ContextEntry> ctx = n.getContext();
-				for(EObject ocl : ctx.keySet()){
-					if(ctx.get(ocl).isEliminated()){
-						continue;
-					}else{
-						Elimination.elimin(n, ocl);
-						ctx.get(ocl).setEliminated(true);
-						break;
+			
+			//intro
+			ArrayList<Node> oldLeafs;
+			ArrayList<Node> newLeafs;
+			
+			do{
+				oldLeafs = NodeHelper.findLeafs(tree);
+				
+				for(Node n : oldLeafs){
+					Introduction.introduction(n, n.getContent(), n.getContext(), n.getLevel(), ProveOption.EACH);	//TODO, default prove option
+				}
+				
+				newLeafs = NodeHelper.findLeafs(tree);
+				//System.out.println(oldLeafs == newLeafs)
+			}while(!oldLeafs.containsAll(newLeafs));
+			
+			
+			
+			
+			//elimin
+			Elimination.init(env, trace, tree, tarmm);
+			while(!Elimination.terminated(NodeHelper.findLeafs(tree))){
+				ArrayList<Node> leafs = NodeHelper.findLeafs(tree);
+				
+				for(Node n : leafs){
+					HashMap<EObject, ContextEntry> ctx = n.getContext();
+					for(EObject ocl : ctx.keySet()){
+						if(ctx.get(ocl).isEliminated()){
+							continue;
+						}else{
+							Elimination.elimin(n, ocl);
+							ctx.get(ocl).setEliminated(true);
+							break;
+						}
 					}
 				}
 			}
 		}
+		
+
 		
 		
 		// print tree

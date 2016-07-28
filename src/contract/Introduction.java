@@ -49,23 +49,23 @@ public class Introduction  {
 	}
 
 
-	public static void introduction(OclExpression expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op) {
+	public static void introduction(Node n, OclExpression expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op) {
 		
 		if (expr instanceof IteratorExp) {
 			IteratorExp todo = (IteratorExp) expr;
-			_introduction(todo, Inferred, depth, op);
+			_introduction(n, todo, Inferred, depth, op);
 		}else if(expr instanceof OperatorCallExp){
 			OperatorCallExp todo = (OperatorCallExp) expr;
-			_introduction(todo, Inferred, depth, op);
+			_introduction(n, todo, Inferred, depth, op);
 		}else if(expr instanceof NavigationOrAttributeCallExp){
 			NavigationOrAttributeCallExp todo = (NavigationOrAttributeCallExp) expr;
-			_introduction(todo, Inferred, depth, op);
+			_introduction(n, todo, Inferred, depth, op);
 		}
 		
 		
 	}
 
-	static void _introduction(IteratorExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op) {
+	static void _introduction(Node curr, IteratorExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op) {
 
 		Iterator bv = expr.getIterators().get(0);
 		OclExpression loopBody = expr.getBody();
@@ -82,22 +82,15 @@ public class Introduction  {
 			OperationCallExp inclusion = make.createOperationCallExp();
 			inclusion.setOperationName("includes");
 			
-			EcoreUtil.Copier cpy = new EcoreUtil.Copier();
-			EObject tempSrc = cpy.copy(loopSrc);
-			cpy.copyReferences();
-			if(tempSrc instanceof OclExpression){
-				inclusion.setSource((OclExpression)tempSrc);
-			}
+			inclusion.setSource(EMFHelper.deepCopy(loopSrc));
 			
 			VariableExp var = make.createVariableExp();
 			var.setReferredVariable(EMFHelper.deepCopy(bv));
 			inclusion.getArguments().add(var);
 			inferNextLv.put(inclusion, new ContextEntry(ContextNature.ASSUME));
 			
-			Node n = new Node(depth + 1, loopBody, expr, inferNextLv, ProveOption.EACH, Tactic.FORALL_INTRO);
+			Node n = new Node(depth + 1, loopBody, curr, inferNextLv, ProveOption.EACH, Tactic.FORALL_INTRO);
 			tree.add(n);
-			
-			introduction(loopBody, inferNextLv, depth + 1, ProveOption.EACH);
 			
 
 		}else if (expr.getName().toLowerCase().equals("exists")) {	
@@ -108,7 +101,7 @@ public class Introduction  {
 		
 	}
 	
-	static void _introduction(NavigationOrAttributeCallExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op){	
+	static void _introduction(Node n, NavigationOrAttributeCallExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op){	
 		// identify single valued navigation
 		String tp = TypeInference.infer(expr,tarmm);
 		
@@ -118,7 +111,7 @@ public class Introduction  {
 		
 	}
 	
-	static void _introduction(OperatorCallExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op){
+	static void _introduction(Node curr, OperatorCallExp expr, HashMap<EObject, ContextEntry> Inferred, int depth, ProveOption op){
 		
 		if(expr.getOperationName().equals("implies")){
 			
@@ -127,33 +120,33 @@ public class Introduction  {
 			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
 			inferNextLv.put(expr.getSource(), new ContextEntry(ContextNature.ASSUME));
 			
-			Node n = new Node(depth + 1, rhs, expr, inferNextLv, op, Tactic.IMPLY_INTRO);
+			Node n = new Node(depth + 1, rhs, curr, inferNextLv, op, Tactic.IMPLY_INTRO);
 			tree.add(n);
-			introduction(rhs, inferNextLv, depth + 1, op);
+			
 			
 		}else if(expr.getOperationName().equals("and")){
 			OclExpression lhs = expr.getSource();
 			OclExpression rhs = expr.getArguments().get(0);
 			
-			Node n1 = new Node(depth + 1, lhs, expr, Inferred, ProveOption.EACH, Tactic.SPLIT);
+			Node n1 = new Node(depth + 1, lhs, curr, Inferred, ProveOption.EACH, Tactic.SPLIT);
 			tree.add(n1);
-			introduction(lhs, Inferred, depth + 1, ProveOption.EACH);
 			
-			Node n2 = new Node(depth + 1, rhs, expr, Inferred, ProveOption.EACH, Tactic.SPLIT);
+			
+			Node n2 = new Node(depth + 1, rhs, curr, Inferred, ProveOption.EACH, Tactic.SPLIT);
 			tree.add(n2);
-			introduction(rhs, Inferred, depth + 1, ProveOption.EACH);
+			
 				
 		}else if(expr.getOperationName().equals("or")){
 			OclExpression lhs = expr.getSource();
 			OclExpression rhs = expr.getArguments().get(0);
 			
-			Node n1 = new Node(depth + 1, lhs, expr, Inferred, ProveOption.ANY, Tactic.OR_LEFT);
+			Node n1 = new Node(depth + 1, lhs, curr, Inferred, ProveOption.ANY, Tactic.OR_LEFT);
 			tree.add(n1);
-			introduction(lhs, Inferred, depth + 1, ProveOption.ANY);
 			
-			Node n2 = new Node(depth + 1, rhs, expr, Inferred, ProveOption.ANY, Tactic.OR_RIGHT);
+			
+			Node n2 = new Node(depth + 1, rhs, curr, Inferred, ProveOption.ANY, Tactic.OR_RIGHT);
 			tree.add(n2);
-			introduction(rhs, Inferred, depth + 1, ProveOption.ANY);
+			
 			
 		}else if(expr.getOperationName().equals("not")){
 			OclExpression src = expr.getSource();
@@ -163,9 +156,9 @@ public class Introduction  {
 			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
 			inferNextLv.put(src, new ContextEntry(ContextNature.ASSUME));
 			
-			Node n1 = new Node(depth + 1, bFalse, expr, inferNextLv, op, Tactic.NEG_INTRO);
+			Node n1 = new Node(depth + 1, bFalse, curr, inferNextLv, op, Tactic.NEG_INTRO);
 			tree.add(n1);
-			introduction(bFalse, inferNextLv, depth + 1, op);
+			
 			
 			
 		}

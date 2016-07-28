@@ -11,9 +11,9 @@
           <returnType xsi:type="ocl:BooleanType" location="10:61-10:68"/>
           <body xsi:type="ocl:IteratorExp" location="11:2-13:39" name="forAll">
             <commentsBefore>-- different target state machines have different names</commentsBefore>
-            <source xsi:type="ocl:OperationCallExp" location="11:2-11:33" operationName="allInstances">
+            <source xsi:type="ocl:OperationCallExp" location="11:2-11:34" operationName="allInstances">
               <commentsBefore>-- different target state machines have different names</commentsBefore>
-              <source xsi:type="ocl:OclModelElement" location="11:2-11:18" name="StateMachine" model="/1">
+              <source xsi:type="ocl:OclModelElement" location="11:2-11:19" name="AbstractState" model="/1">
                 <commentsBefore>-- different target state machines have different names</commentsBefore>
               </source>
             </source>
@@ -37,7 +37,7 @@
               </body>
               <iterators location="12:44-12:46" varName="s2" variableExp="/0/@elements.0/@definition/@feature/@body/@body/@body/@source/@arguments.0 /0/@elements.0/@definition/@feature/@body/@body/@body/@arguments.0/@arguments.0/@source"/>
             </body>
-            <iterators location="11:42-11:44" varName="s1" variableExp="/0/@elements.0/@definition/@feature/@body/@body/@body/@source/@source /0/@elements.0/@definition/@feature/@body/@body/@body/@arguments.0/@source/@source"/>
+            <iterators location="11:43-11:45" varName="s1" variableExp="/0/@elements.0/@definition/@feature/@body/@body/@body/@source/@source /0/@elements.0/@definition/@feature/@body/@body/@body/@arguments.0/@source/@source"/>
           </body>
         </feature>
         <context_ location="10:8-10:32">
