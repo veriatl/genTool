@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.util.EcoreUtil;
 import org.eclipse.m2m.atl.common.OCL.*;
 import org.eclipse.m2m.atl.emftvm.ExecEnv;
 
+import Ocl.OclHelper;
 import Ocl.Printer;
 import Ocl.TypeInference;
 import datastructure.ContextEntry;
@@ -69,6 +70,17 @@ public class Elimination {
 	
 	static void _elimin(Node n, OperatorCallExp expr) {
 		if(expr.getOperationName().equals("and")){
+			OclExpression src = expr.getSource();
+			EList<OclExpression> args = expr.getArguments();
+			
+			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(n.getContext());
+			inferNextLv.put(src, new ContextEntry(ContextNature.INFER));		
+			for(OclExpression arg : args){
+				inferNextLv.put(arg, new ContextEntry(ContextNature.INFER));
+			}
+			
+			Node n1 = new Node(n.getLevel()+1, n.getContent(), n, inferNextLv, n.getRel2Parent(), Tactic.AND_ELIM);
+			tree.add(n1);
 			
 		}else if(expr.getOperationName().equals("or")){	
 			OclExpression src = expr.getSource();
@@ -77,22 +89,46 @@ public class Elimination {
 			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(n.getContext());
 			inferNextLv.put(src, new ContextEntry(ContextNature.ASSUME));
 			
-			Node n1 = new Node(n.getLevel()+1, n.getContent(), n, inferNextLv, n.getRel2Parent(), Tactic.OR_ELIM);
+			Node n1 = new Node(n.getLevel()+1, n.getContent(), n, inferNextLv, ProveOption.EACH, Tactic.OR_ELIM);
 			tree.add(n1);
 			
 			for(OclExpression arg : args){
 				HashMap<EObject, ContextEntry> inferNextLv2 = new HashMap<EObject, ContextEntry>(n.getContext());
 				inferNextLv2.put(arg, new ContextEntry(ContextNature.ASSUME));
 				
-				Node nn = new Node(n.getLevel()+1, n.getContent(), n, inferNextLv2, n.getRel2Parent(), Tactic.OR_ELIM);
+				Node nn = new Node(n.getLevel()+1, n.getContent(), n, inferNextLv2, ProveOption.EACH, Tactic.OR_ELIM);
 				tree.add(nn);
 			}
 			
 			
 		}else if(expr.getOperationName().equals("implies")){
+			OclExpression lhs = expr.getSource();
+			OclExpression rhs = expr.getArguments().get(0);
+			
+			for(EObject entry : n.getContext().keySet()){
+				if(OclHelper.Equal(lhs, entry)){
+					HashMap<EObject, ContextEntry> inferNextLv2 = new HashMap<EObject, ContextEntry>(n.getContext());
+					inferNextLv2.put(rhs, new ContextEntry(ContextNature.INFER));
+					
+					Node nn = new Node(n.getLevel()+1, n.getContent(), n, inferNextLv2, n.getRel2Parent(), Tactic.IMPLY_ELIM);
+					tree.add(nn);
+				}
+			}
 			
 		}else if(expr.getOperationName().equals("not")){
+			OclExpression src = expr.getSource();
 			
+			for(EObject entry : n.getContext().keySet()){
+				if(OclHelper.Equal(src, entry)){
+					HashMap<EObject, ContextEntry> inferNextLv2 = new HashMap<EObject, ContextEntry>(n.getContext());
+					BooleanExp falseExpr = make.createBooleanExp();
+					falseExpr.setBooleanSymbol(false);
+					inferNextLv2.put(falseExpr, new ContextEntry(ContextNature.INFER));
+					
+					Node nn = new Node(n.getLevel()+1, n.getContent(), n, inferNextLv2, n.getRel2Parent(), Tactic.NEG_ELIM);
+					tree.add(nn);
+				}
+			}
 		}
 		
 	}

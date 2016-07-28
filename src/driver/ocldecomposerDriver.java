@@ -22,6 +22,11 @@ import metamodel.EMFLoader;
 import transformation.Trace;
 
 public class ocldecomposerDriver {
+	
+	
+	
+	// Notice: Termination of this strategy depends on what rules are selected, e.g. if inclusion elimin 1 and 2 are both presented, of course it will loop forever
+	// it also depends on whether a fixpoint can be reached at each stage.
 	public static void main(String[] args) throws Exception {
 		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
 		EPackage tarmm = EMFLoader.loadEcore(args[3]);
@@ -44,11 +49,11 @@ public class ocldecomposerDriver {
 				oldLeafs = NodeHelper.findLeafs(tree);
 				
 				for(Node n : oldLeafs){
-					Introduction.introduction(n, n.getContent(), n.getContext(), n.getLevel(), ProveOption.EACH);	//TODO, default prove option
+					//TODO, default prove option
+					Introduction.introduction(n, n.getContent(), n.getContext(), n.getLevel(), ProveOption.EACH);	
 				}
 				
 				newLeafs = NodeHelper.findLeafs(tree);
-				//System.out.println(oldLeafs == newLeafs)
 			}while(!oldLeafs.containsAll(newLeafs));
 			
 			
