@@ -16,6 +16,19 @@ public class ContextEntry  {
 		this.eliminated = false;
 	}
 	
+	public ContextEntry(ContextNature nature, boolean e){
+		this.n = nature;
+		this.eliminated = e;
+	}
+	
+	public ContextNature getNature() {
+		return n;
+	}
+
+	public void setNature(ContextNature n) {
+		this.n = n;
+	}
+	
 	public boolean isEliminated() {
 		return eliminated;
 	}

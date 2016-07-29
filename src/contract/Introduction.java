@@ -17,6 +17,7 @@ import Ocl.OclHelper;
 import Ocl.Printer;
 import Ocl.TypeInference;
 import datastructure.ContextEntry;
+import datastructure.ContextHelper;
 import datastructure.ContextNature;
 import datastructure.Node;
 import datastructure.NodeHelper;
@@ -77,7 +78,7 @@ public class Introduction  {
 
 		
 		if (expr.getName().toLowerCase().equals("forall")) {		
-			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
+			HashMap<EObject, ContextEntry> inferNextLv = ContextHelper.cloneContext(Inferred);
 			inferNextLv.put(bv, new ContextEntry(ContextNature.BV));
 
 			String bvType = TypeInference.getElemType(TypeInference.infer(loopSrc, tarmm));
@@ -136,12 +137,12 @@ public class Introduction  {
 				
 				
 				if(!OclHelper.isMember(Inferred.keySet(), includes) && !OclHelper.isMember(Inferred.keySet(), excludes)){
-					HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
+					HashMap<EObject, ContextEntry> inferNextLv =  ContextHelper.cloneContext(Inferred);
 					inferNextLv.put(includes, new ContextEntry(ContextNature.ASSUME));
 					Node n1 = new Node(depth + 1, expr, n, inferNextLv, ProveOption.EACH, Tactic.NAV_SINGLE_INTRO);
 					tree.add(n1);
 					
-					HashMap<EObject, ContextEntry> inferNextLv2 = new HashMap<EObject, ContextEntry>(Inferred);
+					HashMap<EObject, ContextEntry> inferNextLv2 =  ContextHelper.cloneContext(Inferred);
 					inferNextLv2.put(excludes, new ContextEntry(ContextNature.ASSUME));
 					Node n2 = new Node(depth + 1, expr, n, inferNextLv2, ProveOption.EACH, Tactic.NAV_SINGLE_INTRO);
 					tree.add(n2);	
@@ -160,7 +161,7 @@ public class Introduction  {
 			
 			OclExpression rhs = expr.getArguments().get(0);
 			
-			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
+			HashMap<EObject, ContextEntry> inferNextLv =  ContextHelper.cloneContext(Inferred);
 			inferNextLv.put(expr.getSource(), new ContextEntry(ContextNature.ASSUME));
 			
 			Node n = new Node(depth + 1, rhs, curr, inferNextLv, op, Tactic.IMPLY_INTRO);
@@ -196,7 +197,7 @@ public class Introduction  {
 			BooleanExp bFalse = make.createBooleanExp();
 			bFalse.setBooleanSymbol(false);
 			
-			HashMap<EObject, ContextEntry> inferNextLv = new HashMap<EObject, ContextEntry>(Inferred);
+			HashMap<EObject, ContextEntry> inferNextLv =  ContextHelper.cloneContext(Inferred);
 			inferNextLv.put(src, new ContextEntry(ContextNature.ASSUME));
 			
 			Node n1 = new Node(depth + 1, bFalse, curr, inferNextLv, op, Tactic.NEG_INTRO);

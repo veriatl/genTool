@@ -93,9 +93,14 @@ public class Node implements Comparable {
 		String ctx = "";
 		
 		for(EObject entry : this.context.keySet()){
-			ctx += String.format("%s \t *%s* , \n",  Printer.print(entry), this.context.get(entry));
+			ctx += String.format("%s \t *%s* , [%s]\n",  Printer.print(entry), this.context.get(entry), this.context.get(entry).eliminated);
 		}
 		
-		return String.format("Lv: %d, \nctx: [%s], \n===\nGoal: %s, \napplied %s", level, ctx, Printer.print(content), ruleApplied);
+		String h = "";
+		if(parent != null){
+			h =Integer.toHexString(parent.hashCode());
+		}
+		
+		return String.format("Lv: %d\n Node: %s, Parent: %s\nctx: [%s], \n===\nGoal: %s, \napplied %s", level, Integer.toHexString(this.hashCode()), h, ctx, Printer.print(content), ruleApplied);
 	}
 }

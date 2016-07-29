@@ -29,6 +29,8 @@ public class ocldecomposerDriver {
 	// it also depends on whether a fixpoint can be reached at each stage.
 	
 	// the limitation of this strategy is that it doesn't handle well if eliminate triggers new introduction, which is we trying to avoid because of mutual recursive call.
+	
+	// the most difficulty part is type inference, and deep copy of objects.
 	public static void main(String[] args) throws Exception {
 		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
 		EPackage tarmm = EMFLoader.loadEcore(args[3]);
@@ -60,6 +62,8 @@ public class ocldecomposerDriver {
 			
 			
 			
+
+			
 			
 			//elimin
 			Elimination.init(env, trace, tree, tarmm);
@@ -72,24 +76,28 @@ public class ocldecomposerDriver {
 						if(ctx.get(ocl).isEliminated()){
 							continue;
 						}else{
-							Elimination.elimin(n, ocl);
 							ctx.get(ocl).setEliminated(true);
+							Elimination.elimin(n, ocl);	
 							break;
 						}
 					}
 				}
+
 			}
 		}
 		
 
-		
-		
 		// print tree
 		Collections.sort(tree);
-		for(Node n : tree){
+		int i = 0;
+		for(Node n : NodeHelper.findLeafs(tree)){
 			System.out.println(n.toString());
 			System.out.println("===");
+			i++;
 		}
 		
+		System.out.println(i);
+		
+
 	}
 }
