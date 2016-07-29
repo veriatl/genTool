@@ -35,11 +35,14 @@ public class ocldecomposerDriver {
 		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
 		EPackage tarmm = EMFLoader.loadEcore(args[3]);
 		Map<String, ArrayList<String>> trace = Trace.getTrace(tarmm, env);
-		ArrayList<Node> tree = new ArrayList<Node>();
 		
-		Introduction.init(env, trace, tree, tarmm);
+		
+		
 		List<OclExpression> postconditions = ContractLoader.init("HSM2FSM/Source/ContractSRC/HSM2FSMContract.atl");
 		for (OclExpression post : postconditions) {
+			ArrayList<Node> tree = new ArrayList<Node>();
+			Introduction.init(env, trace, tree, tarmm);
+			
 			HashMap<EObject, ContextEntry> emptyTrace = new HashMap<EObject, ContextEntry>();
 			Node root = new Node(0, post, null, emptyTrace, null, null);
 			tree.add(root);
@@ -84,19 +87,26 @@ public class ocldecomposerDriver {
 				}
 
 			}
+			
+			System.out.println("====");
+			System.out.println(post.getCommentsBefore());
+			System.out.println("====");
+			
+			// print tree
+			Collections.sort(tree);
+			int i = 0;
+			for(Node n : NodeHelper.findLeafs(tree)){
+				System.out.println(n.toString());
+				System.out.println("===");
+				i++;
+			}
+			
+			System.out.println("Total subgoals:"+i);
+			
 		}
 		
 
-		// print tree
-		Collections.sort(tree);
-		int i = 0;
-		for(Node n : NodeHelper.findLeafs(tree)){
-			System.out.println(n.toString());
-			System.out.println("===");
-			i++;
-		}
-		
-		System.out.println(i);
+
 		
 
 	}

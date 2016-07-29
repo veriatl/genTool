@@ -53,6 +53,9 @@ public class Printer {
 		}else if (expr instanceof StringExp){
 			StringExp todo = (StringExp) expr;
 			rtn = _print(todo);
+		}else if(expr instanceof BooleanExp){
+			BooleanExp todo = (BooleanExp) expr;
+			rtn = _print(todo);
 		}
 		
 		return rtn;
@@ -112,6 +115,12 @@ public class Printer {
 			OclExpression rhs = expr.getArguments().get(0);
 			
 			rtn = String.format("%s <> %s", print(lhs), print(rhs));	
+			
+		}else if(expr.getOperationName().equals("=")){
+			OclExpression lhs = expr.getSource();
+			OclExpression rhs = expr.getArguments().get(0);
+			
+			rtn = String.format("%s = %s", print(lhs), print(rhs));	
 			
 		}
 		
@@ -183,9 +192,16 @@ public class Printer {
 		return expr.getVarName();
 	}
 	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+	
+	public static String _print(BooleanExp expr){
+		return Boolean.toString(expr.isBooleanSymbol());
 	}
+	
+	
+	
+//	public static void main(String[] args) {
+//		// TODO Auto-generated method stub
+//
+//	}
 
 }
