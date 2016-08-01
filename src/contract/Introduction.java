@@ -24,7 +24,7 @@ import datastructure.NodeHelper;
 import datastructure.ProveOption;
 import datastructure.Tactic;
 import keywords.Keyword;
-import metamodel.EMFHelper;
+import metamodel.EMFCopier;
 import metamodel.EMFLoader;
 import transformation.Trace;
 
@@ -89,10 +89,10 @@ public class Introduction  {
 			OperationCallExp inclusion = make.createOperationCallExp();
 			inclusion.setOperationName("includes");
 			
-			inclusion.setSource(EMFHelper.deepCopy(loopSrc));
+			inclusion.setSource(EMFCopier.deepCopy(loopSrc));
 			
 			VariableExp var = make.createVariableExp();
-			var.setReferredVariable(EMFHelper.deepCopy(bv));
+			var.setReferredVariable(EMFCopier.deepCopy(bv));
 			inclusion.getArguments().add(var);
 			inferNextLv.put(inclusion, new ContextEntry(ContextNature.ASSUME));
 			
@@ -127,13 +127,13 @@ public class Introduction  {
 				
 				OperationCallExp includes = make.createOperationCallExp();
 				includes.setOperationName("includes");
-				includes.setSource(EMFHelper.deepCopy(col));
-				includes.getArguments().add(EMFHelper.deepCopy(src));
+				includes.setSource(EMFCopier.deepCopy(col));
+				includes.getArguments().add(EMFCopier.deepCopy(src));
 				
 				OperationCallExp excludes = make.createOperationCallExp();
 				excludes.setOperationName("excludes");
-				excludes.setSource(EMFHelper.deepCopy(col));
-				excludes.getArguments().add(EMFHelper.deepCopy(src));
+				excludes.setSource(EMFCopier.deepCopy(col));
+				excludes.getArguments().add(EMFCopier.deepCopy(src));
 				
 				
 				if(!OclHelper.isMember(Inferred.keySet(), includes) && !OclHelper.isMember(Inferred.keySet(), excludes)){

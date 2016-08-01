@@ -7,8 +7,8 @@ create OUT : FSM from IN : HSM;
 --POSTCONDITION FSM
 
 --@post
---helper context FSM!Transition def: fsm_transition_src_multi_lower(): Boolean = -- a transition has at least one source
---  FSM!Transition.allInstances()->forAll(t | t.source.oclIsUndefined());
+helper context FSM!Transition def: fsm_transition_src_multi_lower(): Boolean = -- a transition has at least one source
+  FSM!Transition.allInstances()->forAll(t | t.source.oclIsUndefined());
   
 --@post
 --helper context FSM!Transition def: fsm_transition_trg_multi_lower(): Boolean = -- a transition has at least one target
@@ -41,8 +41,10 @@ create OUT : FSM from IN : HSM;
 --  FSM!Transition.allInstances()->forAll(t | t.stateMachine.oclIsUndefined());
 
 --@post
-helper context FSM!Transition def: fsm_transition_src_multi_upper(): Boolean = -- a transition has at most one source [Not Deep]
-  FSM!Transition.allInstances()->forAll(t | 
-    FSM!AbstractState.allInstances()->forAll(s1 | 
-      FSM!AbstractState.allInstances()->forAll(s2 |
-        (t.source=s1 and t.source=s2) implies s1=s2)));
+
+
+--helper context FSM!Transition def: fsm_transition_src_multi_upper(): Boolean = -- a transition has at most one source [Not Deep]
+--  FSM!Transition.allInstances()->forAll(t | 
+--   FSM!AbstractState.allInstances()->forAll(s1 | 
+--      FSM!AbstractState.allInstances()->forAll(s2 |
+--       (t.source=s1 and t.source=s2) implies s1=s2)));

@@ -11,6 +11,7 @@ import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.m2m.atl.common.OCL.OclExpression;
 import org.eclipse.m2m.atl.emftvm.ExecEnv;
 
+import Ocl.Ocl2Boogie;
 import contract.ContractLoader;
 import contract.Elimination;
 import contract.Introduction;
@@ -94,9 +95,10 @@ public class ocldecomposerDriver {
 			
 			// print tree
 			Collections.sort(tree);
+			Ocl2Boogie.init(tarmm);
 			int i = 0;
 			for(Node n : NodeHelper.findLeafs(tree)){
-				System.out.println(n.toString());
+				System.out.println(n.toBoogie(env));
 				System.out.println("===");
 				i++;
 			}

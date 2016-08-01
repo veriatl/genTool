@@ -112,7 +112,14 @@ public class Trace {
 	
 	
 	
-	
+	public static ArrayList<String> ruleOrdered(ExecEnv env){
+		ArrayList<String> rtn = new ArrayList<String>();
+		for(Rule r : env.getRules()){
+			rtn.add(r.getName());
+			
+		}
+		return rtn;
+	}
 	
 	
 	

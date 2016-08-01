@@ -1,72 +1,91 @@
 package metamodel;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.emf.ecore.EObject;
-import org.eclipse.emf.ecore.EReference;
+import org.eclipse.emf.ecore.EClass;
+import org.eclipse.emf.ecore.EClassifier;
+import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.emf.ecore.EStructuralFeature;
-import org.eclipse.emf.ecore.util.EcoreUtil;
-import org.eclipse.m2m.atl.common.OCL.*;
+
+import keywords.Keyword;
 
 public class EMFHelper {
-
 	
-	public static <T extends EObject> T deepCopy(T e){
+	
+	public static ArrayList<String> getClassifiersNames(EPackage mm)  {
 		
-		T rtn = EcoreUtil.copy(e);
+		ArrayList<String> rtn = new ArrayList<String>();
 		
-		if(e instanceof OclModelElement){
-			_deepCopy((OclModelElement) rtn, (OclModelElement) e);
-		}else if(e instanceof Iterator){
-			_deepCopy((Iterator)rtn, (Iterator)e);
-		}else if(e instanceof VariableExp){
-			_deepCopy((VariableExp)rtn, (VariableExp)e);
-		}else if(e instanceof NavigationOrAttributeCallExp){
-			_deepCopy((NavigationOrAttributeCallExp)rtn, (NavigationOrAttributeCallExp)e);
-		}else if(e instanceof OperationCallExp){
-			_deepCopy((OperationCallExp)rtn, (OperationCallExp)e);
+		for (EClassifier cl : mm.getEClassifiers()) {
+
+			if (cl instanceof EClass) {
+				EClass clazz = (EClass) cl;
+				String qualifiedClazz =  mm.getName() + "$" + clazz.getName();
+				rtn.add(qualifiedClazz);
+			}
 		}
-		
-		
 		return rtn;
-		
+
 	}
 	
 	
-	private static void _deepCopy(OclModelElement copy, OclModelElement src){
-		OclModel m = deepCopy(src.getModel());
-		copy.setModel(m);
-	}
-	
-	private static void _deepCopy(Iterator copy, Iterator src){
-		OclType tp = deepCopy(src.getType());		
-		copy.setType(tp);
-	}
-	
-	private static void _deepCopy(VariableExp copy, VariableExp src){
-		VariableDeclaration var = deepCopy(src.getReferredVariable());
-		copy.setReferredVariable(var);
-	}
-	
-	private static void _deepCopy(NavigationOrAttributeCallExp copy, NavigationOrAttributeCallExp src){
-		OclExpression s = deepCopy(src.getSource());	
-		copy.setSource(s);
+	public static Map<String, String> readParantInfo(EPackage mm)  {
+
+		Map<String, String> info = new HashMap<String, String>();
+
+		String mmPrefix = mm.getName() + "$";
+
+		for (EClassifier cl : mm.getEClassifiers()) {
+
+			if (cl instanceof EClass) {
+				EClass clazz = (EClass) cl;
+
+				for (EClass sp : clazz.getESuperTypes()) {
+
+					info.put(mmPrefix + cl.getName(), 
+							 mmPrefix + sp.getName());
+				}
+			}
+
+		}
+
+		return info;
 	}
 
-	private static void _deepCopy(OperationCallExp copy, OperationCallExp src){
-		OclExpression s = deepCopy(src.getSource());	
-		copy.setSource(s);
+	public static boolean isSubtype(String sub, String sup, EPackage tarmm)  {
+		Map<String, String> inheirtence = readParantInfo(tarmm);
+
+		if (!inheirtence.containsKey(sub)) {
+			return false;
+		} else {
+			return inheirtence.get(sub).equals(sup);
+		}
+
 	}
 
-	/* Template
-	private static void _deepCopy(? copy, ? src){
-			
+	public static String getStructuralFeatureType(String tp, String attr, EPackage mm)  {
 		
+		String rtn = "unknown";
+		
+		for (EClassifier cl : mm.getEClassifiers()) {
+
+			if (cl instanceof EClass) {
+				EClass clazz = (EClass) cl;
+				String qualifiedClazz =  mm.getName() + "$" + clazz.getName();
+				if (qualifiedClazz.equals(tp)) {
+					EStructuralFeature sf = clazz.getEStructuralFeature(attr);
+					rtn = sf.getEType().getName();
+					
+					if(sf.getUpperBound()==-1){
+						rtn = Keyword.TYPE_COL+rtn;
+					}
+					
+				}
+			}
+		}
+		return rtn;
+
 	}
-	
-	*/
-	
 }

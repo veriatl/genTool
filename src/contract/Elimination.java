@@ -21,7 +21,7 @@ import datastructure.ContextNature;
 import datastructure.Node;
 import datastructure.ProveOption;
 import datastructure.Tactic;
-import metamodel.EMFHelper;
+import metamodel.EMFCopier;
 
 public class Elimination {
 	
@@ -151,7 +151,7 @@ public class Elimination {
 				c1.setOperationName("genBy");
 				StringExp s = make.createStringExp();
 				s.setStringSymbol(first);
-				c1.setSource(EMFHelper.deepCopy(src));
+				c1.setSource(EMFCopier.deepCopy(src));
 				c1.getArguments().add(s);
 				
 				OperatorCallExp or = make.createOperatorCallExp();
@@ -165,7 +165,7 @@ public class Elimination {
 					cn.setOperationName("genBy");
 					StringExp sn = make.createStringExp();
 					sn.setStringSymbol(rule);
-					cn.setSource(EMFHelper.deepCopy(src));
+					cn.setSource(EMFCopier.deepCopy(src));
 					cn.getArguments().add(sn);
 					
 					or.getArguments().add(cn);
@@ -192,7 +192,7 @@ public class Elimination {
 				c1.setOperationName("genBy");
 				StringExp s = make.createStringExp();
 				s.setStringSymbol(first);
-				c1.setSource(EMFHelper.deepCopy(src));
+				c1.setSource(EMFCopier.deepCopy(src));
 				c1.getArguments().add(s);
 				
 				OperatorCallExp or = make.createOperatorCallExp();
@@ -206,7 +206,7 @@ public class Elimination {
 					cn.setOperationName("genBy");
 					StringExp sn = make.createStringExp();
 					sn.setStringSymbol(rule);
-					cn.setSource(EMFHelper.deepCopy(src));
+					cn.setSource(EMFCopier.deepCopy(src));
 					cn.getArguments().add(sn);
 					
 					or.getArguments().add(cn);
