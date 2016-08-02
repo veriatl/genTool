@@ -22,7 +22,7 @@ public class EMFHelper {
 
 			if (cl instanceof EClass) {
 				EClass clazz = (EClass) cl;
-				String qualifiedClazz =  mm.getName() + "$" + clazz.getName();
+				String qualifiedClazz =  mm.getName() + Keyword.METAMODELSPLIT + clazz.getName();
 				rtn.add(qualifiedClazz);
 			}
 		}
@@ -35,7 +35,7 @@ public class EMFHelper {
 
 		Map<String, String> info = new HashMap<String, String>();
 
-		String mmPrefix = mm.getName() + "$";
+		String mmPrefix = mm.getName() + Keyword.METAMODELSPLIT;
 
 		for (EClassifier cl : mm.getEClassifiers()) {
 
@@ -73,7 +73,7 @@ public class EMFHelper {
 
 			if (cl instanceof EClass) {
 				EClass clazz = (EClass) cl;
-				String qualifiedClazz =  mm.getName() + "$" + clazz.getName();
+				String qualifiedClazz =  mm.getName() + Keyword.METAMODELSPLIT + clazz.getName();
 				if (qualifiedClazz.equals(tp)) {
 					EStructuralFeature sf = clazz.getEStructuralFeature(attr);
 					rtn = sf.getEType().getName();
@@ -88,4 +88,18 @@ public class EMFHelper {
 		return rtn;
 
 	}
+	
+	
+	public static String getModel(String tp){
+		String mm = tp.substring(0, tp.indexOf(Keyword.METAMODELSPLIT));
+		return mm;
+	}
+	
+	public static String getClassifier(String tp){
+		String cl = tp.substring(tp.indexOf(Keyword.METAMODELSPLIT)+1, tp.length());
+		return cl;
+	}
+	
+	
+	
 }

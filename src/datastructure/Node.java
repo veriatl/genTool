@@ -184,7 +184,7 @@ public class Node implements Comparable {
 		String ctx = "";
 		
 		for(EObject entry : this.context.keySet()){
-			ctx += String.format("%s \t *%s*\n",  Ocl2Boogie.print(entry), this.context.get(entry));
+			ctx += String.format("%s \t *%s*\n",  Printer.print(entry), this.context.get(entry));
 		}
 		
 		String h = "";

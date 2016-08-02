@@ -7,8 +7,8 @@ create OUT : FSM from IN : HSM;
 --POSTCONDITION FSM
 
 --@post
-helper context FSM!Transition def: fsm_transition_src_multi_lower(): Boolean = -- a transition has at least one source
-  FSM!Transition.allInstances()->forAll(t | t.source.oclIsUndefined());
+--helper context FSM!Transition def: fsm_transition_src_multi_lower(): Boolean = -- a transition has at least one source
+--  FSM!Transition.allInstances()->forAll(t | t.source.oclIsUndefined());
   
 --@post
 --helper context FSM!Transition def: fsm_transition_trg_multi_lower(): Boolean = -- a transition has at least one target
@@ -16,8 +16,8 @@ helper context FSM!Transition def: fsm_transition_src_multi_lower(): Boolean = -
 
 
 --@post
---helper context FSM!Transition def: fsm_transition_trg_multi_lower(): Boolean = -- a transition has at least one target[Not Deep]
---  FSM!Transition.allInstances()->forAll(t |not t.target.oclIsUndefined());
+helper context FSM!Transition def: fsm_transition_trg_multi_lower(): Boolean = -- a transition has at least one target[Not Deep]
+  FSM!Transition.allInstances()->forAll(t |not t.target.oclIsUndefined());
 
 --@post
 --helper context FSM!StateMachine def: unique_fsm_sm_names(): Boolean = -- different target state machines have different names

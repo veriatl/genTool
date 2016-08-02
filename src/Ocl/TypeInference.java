@@ -48,6 +48,7 @@ public class TypeInference {
 		if(expr.getOperationName().equals("allInstances")){
 			rtn =  Keyword.TYPE_COL + infer(expr.getSource(),mm);
 		}
+		
 		return rtn;
 	}
 	
@@ -62,13 +63,17 @@ public class TypeInference {
 		}else{
 			rtn = String.format("%s$%s", mm.getName(), expr.getName());
 		}
+		
 		return rtn;
 	}
 	
 	public static String _infer(NavigationOrAttributeCallExp expr, EPackage mm){
-		
+		String rtn = Keyword.TYPE_UNKNOWN;
 		String srcType = infer(expr.getSource(),mm);
-		return EMFLoader.getStructuralFeatureType(srcType, expr.getName(),mm);
+		String navType =  EMFLoader.getStructuralFeatureType(srcType, expr.getName(),mm);
+		rtn = navType;
+		
+		return rtn;
 		
 	}
 	

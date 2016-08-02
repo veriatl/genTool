@@ -7,4 +7,5 @@ public class Keyword {
 	public static final String EMPTY_STRING = "";
 	public static final String SRCHEAP = "$srcHeap";
 	public static final String TARHEAP = "$tarHeap";
+	public static final String METAMODELSPLIT = "$";
 }

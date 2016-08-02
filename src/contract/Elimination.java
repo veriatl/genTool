@@ -21,7 +21,9 @@ import datastructure.ContextNature;
 import datastructure.Node;
 import datastructure.ProveOption;
 import datastructure.Tactic;
+import keywords.Keyword;
 import metamodel.EMFCopier;
+import metamodel.EMFHelper;
 
 public class Elimination {
 	
@@ -143,6 +145,8 @@ public class Elimination {
 			String colType = TypeInference.infer(col, tarmm);
 			String elemType = TypeInference.getElemType(colType);
 			
+			
+			
 			if(trace.get(elemType).size()>0){
 				
 				String first = trace.get(elemType).get(0);
@@ -223,6 +227,53 @@ public class Elimination {
 				tree.add(newNode);
 				
 			}
+		}else if(expr.getOperationName().equals("oclIsUndefined")){	//TODO there probably more operation can be applied this elimin rule.
+			OclExpression src = expr.getSource();
+			if(src instanceof NavigationOrAttributeCallExp){
+				// identify single valued navigation
+				String tp = TypeInference.infer(src, tarmm);
+
+				
+				
+				if(!tp.startsWith(Keyword.TYPE_COL) && !TypeInference.isPrimitive(tp)){
+					OperationCallExp col = make.createCollectionOperationCallExp();
+					col.setOperationName("allInstances");
+					OclModelElement m = make.createOclModelElement();
+					
+					String mmName = EMFHelper.getModel(tp);
+					String clName = EMFHelper.getClassifier(tp);
+					m.setName(clName);
+					OclModel model = make.createOclModel();
+					model.setName(mmName);
+					m.setModel(model);
+					col.setSource(m);
+					
+					OperationCallExp includes = make.createOperationCallExp();
+					includes.setOperationName("includes");
+					includes.setSource(EMFCopier.deepCopy(col));
+					includes.getArguments().add(EMFCopier.deepCopy(src));
+					
+					OperationCallExp excludes = make.createOperationCallExp();
+					excludes.setOperationName("excludes");
+					excludes.setSource(EMFCopier.deepCopy(col));
+					excludes.getArguments().add(EMFCopier.deepCopy(src));
+					
+					
+					if(!OclHelper.isMember(n.getContext().keySet(), includes) && !OclHelper.isMember(n.getContext().keySet(), excludes)){
+						HashMap<EObject, ContextEntry> inferNextLv =  ContextHelper.cloneContext(n.getContext());
+						inferNextLv.put(includes, new ContextEntry(ContextNature.ASSUME));
+						Node n1 = new Node(n.getLevel() + 1, n.getContent(), n, inferNextLv, ProveOption.EACH, Tactic.NAV_SINGLE_INTRO);
+						tree.add(n1);
+						
+						HashMap<EObject, ContextEntry> inferNextLv2 =  ContextHelper.cloneContext(n.getContext());
+						inferNextLv2.put(excludes, new ContextEntry(ContextNature.ASSUME));
+						Node n2 = new Node(n.getLevel() + 1, n.getContent(), n, inferNextLv2, ProveOption.EACH, Tactic.NAV_SINGLE_INTRO);
+						tree.add(n2);	
+					}
+						
+				
+				}
+			}	
 		}
 		
 		

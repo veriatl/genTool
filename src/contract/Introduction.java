@@ -25,6 +25,7 @@ import datastructure.ProveOption;
 import datastructure.Tactic;
 import keywords.Keyword;
 import metamodel.EMFCopier;
+import metamodel.EMFHelper;
 import metamodel.EMFLoader;
 import transformation.Trace;
 
@@ -122,7 +123,13 @@ public class Introduction  {
 				OperationCallExp col = make.createCollectionOperationCallExp();
 				col.setOperationName("allInstances");
 				OclModelElement m = make.createOclModelElement();
-				m.setName(tp);
+				
+				String mmName = EMFHelper.getModel(tp);
+				String clName = EMFHelper.getClassifier(tp);
+				m.setName(clName);
+				OclModel model = make.createOclModel();
+				model.setName(mmName);
+				m.setModel(model);
 				col.setSource(m);
 				
 				OperationCallExp includes = make.createOperationCallExp();

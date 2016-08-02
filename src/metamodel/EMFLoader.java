@@ -39,7 +39,7 @@ public class EMFLoader {
 
 		Map<String, String> info = new HashMap<String, String>();
 
-		String mmPrefix = mm.getName() + "$";
+		String mmPrefix = mm.getName() + Keyword.METAMODELSPLIT;
 
 		for (EClassifier cl : mm.getEClassifiers()) {
 
@@ -77,10 +77,10 @@ public class EMFLoader {
 
 			if (cl instanceof EClass) {
 				EClass clazz = (EClass) cl;
-				String qualifiedClazz =  mm.getName() + "$" + clazz.getName();
+				String qualifiedClazz =  mm.getName() + Keyword.METAMODELSPLIT + clazz.getName();
 				if (qualifiedClazz.equals(tp)) {
 					EStructuralFeature sf = clazz.getEStructuralFeature(attr);
-					rtn = sf.getEType().getName();
+					rtn =  mm.getName()+Keyword.METAMODELSPLIT+sf.getEType().getName();
 					
 					if(sf.getUpperBound()==-1){
 						rtn = Keyword.TYPE_COL+rtn;

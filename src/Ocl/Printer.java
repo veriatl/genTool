@@ -146,6 +146,9 @@ public class Printer {
 			OclExpression src = expr.getSource();
 			OclExpression rl = expr.getArguments().get(0);
 			rtn = String.format("%s genBy %s", print(src), print(rl));
+		}else if(expr.getOperationName().equals("oclIsUndefined")){
+			OclExpression src = expr.getSource();
+			rtn = String.format("%s.oclIsUndefined()", print(src));
 		}else{
 			OclExpression src = expr.getSource();
 			rtn = String.format("%s applied on %s with args:", expr.getOperationName(), print(src));
