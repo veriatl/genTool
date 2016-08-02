@@ -93,7 +93,7 @@ public class ocldecomposerDriver {
 			System.out.println(post.getCommentsBefore());
 			System.out.println("====");
 			
-			// print tree
+			// print tree test
 			Collections.sort(tree);
 			Ocl2Boogie.init(tarmm);
 			int i = 0;
