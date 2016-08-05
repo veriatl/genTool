@@ -98,7 +98,7 @@ public class ocldecomposerDriver {
 			Ocl2Boogie.init(tarmm);
 			int i = 0;
 			for(Node n : NodeHelper.findLeafs(tree)){
-				System.out.println(n.toBoogie(env));
+				System.out.println(n.toString());
 				System.out.println("===");
 				i++;
 			}
