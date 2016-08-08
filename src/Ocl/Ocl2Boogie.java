@@ -144,7 +144,9 @@ public class Ocl2Boogie {
 			rtn = String.format("genBy(%s, %s, %s, %s)", print(src), print(rl), Keyword.SRCHEAP, Keyword.TARHEAP);
 		}else if(expr.getOperationName().equals("oclIsUndefined")){
 			OclExpression src = expr.getSource();
-			rtn = String.format("%s == null", print(src));
+			String srcTp = TypeInference.infer(expr.getSource(), tarMM);
+			String heap = getHeapName(tarMM, srcTp);
+			rtn = String.format("%s == null || !read(%s, %s, alloc)", print(src), heap, print(src));
 		}else{
 			OclExpression src = expr.getSource();
 			rtn = String.format("%s applied on %s with args:", expr.getOperationName(), print(src));
