@@ -89,6 +89,38 @@ public class EMFHelper {
 
 	}
 	
+	public static String getAbstractStrcturalFeature(EPackage mm, String tp, String sf){
+		String rtn = "unknown";
+		for (EClassifier cl : mm.getEClassifiers()) {
+
+			if (cl instanceof EClass) {
+				EClass clazz = (EClass) cl;
+				
+				String qualifiedClazz =  mm.getName() + Keyword.METAMODELSPLIT + clazz.getName();
+				if(qualifiedClazz.equals(tp)){
+					if(clazz.getESuperTypes()!=null && clazz.getESuperTypes().size()!=0){
+						for(EClass parent : clazz.getESuperTypes()){
+							String qualifiedParent =  mm.getName() + Keyword.METAMODELSPLIT + parent.getName();
+							
+							if(parent.getEStructuralFeature(sf) != null){
+								rtn = String.format("%s.%s", qualifiedParent, sf);
+							}else if(clazz.getEStructuralFeature(sf) != null){
+								rtn = String.format("%s.%s", qualifiedClazz, sf);
+							}
+								
+							break;
+						}
+					}else{
+						rtn = String.format("%s.%s", qualifiedClazz, sf);
+					}	
+				}
+				
+			}
+		}
+		return rtn;
+		
+	}
+	
 	
 	public static String getModel(String tp){
 		String mm = tp.substring(0, tp.indexOf(Keyword.METAMODELSPLIT));

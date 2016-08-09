@@ -15,6 +15,13 @@ public class TypeInference {
 	public static Map<String, String> lookup = new HashMap<String, String>();
 
 	
+	public static void init(Map<String, String> map){
+		lookup.clear();
+		lookup.putAll(map);
+	}
+	
+	
+	
 	public static String infer(EObject expr, EPackage mm){
 		String rtn = Keyword.TYPE_UNKNOWN;
 		

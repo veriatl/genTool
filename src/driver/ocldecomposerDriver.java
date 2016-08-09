@@ -10,6 +10,8 @@ import java.util.Map;
 
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
+import org.eclipse.m2m.atl.common.ATL.MatchedRule;
+import org.eclipse.m2m.atl.common.ATL.Rule;
 import org.eclipse.m2m.atl.common.OCL.OclExpression;
 import org.eclipse.m2m.atl.emftvm.ExecEnv;
 
@@ -22,7 +24,9 @@ import datastructure.Node;
 import datastructure.NodeHelper;
 import datastructure.ProveOption;
 import metamodel.EMFLoader;
+import transformation.GenBy;
 import transformation.Trace;
+import transformation.TransformationLoader;
 
 public class ocldecomposerDriver {
 	
@@ -37,11 +41,14 @@ public class ocldecomposerDriver {
 	public static void main(String[] args) throws Exception {
 		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
 		EPackage tarmm = EMFLoader.loadEcore(args[3]);
+		EPackage srcmm = EMFLoader.loadEcore(args[2]);
 		Map<String, ArrayList<String>> trace = Trace.getTrace(tarmm, env);
 		
 		
 		
 		List<OclExpression> postconditions = ContractLoader.init("HSM2FSM/Source/ContractSRC/HSM2FSMContract.atl");
+		List<MatchedRule> rules = TransformationLoader.init("HSM2FSM/Source/ATLSRC/HSM2FSM.atl");
+		
 		for (OclExpression post : postconditions) {
 			ArrayList<Node> tree = new ArrayList<Node>();
 			Introduction.init(env, trace, tree, tarmm);
@@ -110,7 +117,11 @@ public class ocldecomposerDriver {
 				i++;
 			}
 			
-			System.out.println("Total subgoals:"+i);
+			
+			GenBy.init(rules,srcmm);
+			String path = "HSM2FSM/SubGoals/";
+			GenBy.print(path);
+			
 			
 		}
 		
