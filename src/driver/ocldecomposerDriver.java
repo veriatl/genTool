@@ -1,5 +1,7 @@
 package driver;
 
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -96,10 +98,15 @@ public class ocldecomposerDriver {
 			// print tree test
 			Collections.sort(tree);
 			Ocl2Boogie.init(tarmm);
+			PrintStream out;
+			String folderName = "HSM2FSM/SubGoals/";
 			int i = 0;
 			for(Node n : NodeHelper.findLeafs(tree)){
+				String fileName = String.format("%scase%02d.bpl", folderName, i);
+				out =  new PrintStream(new FileOutputStream(fileName));
+				System.setOut(out);
 				System.out.println(n.toBoogie(env));
-				System.out.println("===");
+			
 				i++;
 			}
 			
