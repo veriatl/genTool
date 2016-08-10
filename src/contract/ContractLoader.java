@@ -32,15 +32,21 @@ public class ContractLoader {
 		
 		if(m instanceof EMFModel){
 			EMFModel emf = (EMFModel) m;
+			
 			for(EObject o : emf.getResource().getContents()){
 				if(o instanceof Module){
 					Module mod = (Module) o;
+					
 					for(ModuleElement elem : mod.getElements()){
-						if(elem instanceof Helper && elem.getCommentsBefore().contains("--@post")){
+						if(elem instanceof Helper){
 							Helper h = (Helper) elem;		
+							
 							if(h.getDefinition().getFeature() instanceof Operation){
-								Operation contract = (Operation) h.getDefinition().getFeature();
-								rtn.add(contract.getBody());							
+								if(((Operation)h.getDefinition().getFeature()).getName().startsWith("post_")){
+									
+									Operation contract = (Operation) h.getDefinition().getFeature();
+									rtn.add(contract.getBody());	
+								}							
 							}
 							
 						}

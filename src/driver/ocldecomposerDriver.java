@@ -1,5 +1,6 @@
 package driver;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.emf.ecore.EObject;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.m2m.atl.common.ATL.MatchedRule;
@@ -44,10 +46,16 @@ public class ocldecomposerDriver {
 		EPackage srcmm = EMFLoader.loadEcore(args[2]);
 		Map<String, ArrayList<String>> trace = Trace.getTrace(tarmm, env);
 		
+		String contractPath = args[6];
+		String transformationSrcPath = args[7];
+		String subGoalsPath = args[8];
+		String genByPath = args[9];
 		
 		
-		List<OclExpression> postconditions = ContractLoader.init("HSM2FSM/Source/ContractSRC/HSM2FSMContract.atl");
-		List<MatchedRule> rules = TransformationLoader.init("HSM2FSM/Source/ATLSRC/HSM2FSM.atl");
+		List<OclExpression> postconditions = ContractLoader.init(contractPath);
+		List<MatchedRule> rules = TransformationLoader.init(transformationSrcPath);
+		
+		
 		
 		for (OclExpression post : postconditions) {
 			ArrayList<Node> tree = new ArrayList<Node>();
@@ -73,11 +81,7 @@ public class ocldecomposerDriver {
 				newLeafs = NodeHelper.findLeafs(tree);
 			}while(!oldLeafs.containsAll(newLeafs));
 			
-			
-			
 
-			
-			
 			//elimin
 			Elimination.init(env, trace, tree, tarmm);
 			while(!Elimination.terminated(NodeHelper.findLeafs(tree))){
@@ -97,35 +101,31 @@ public class ocldecomposerDriver {
 				}
 
 			}
-			
-			System.out.println("====");
-			System.out.println(post.getCommentsBefore());
-			System.out.println("====");
-			
+						
 			// print tree test
 			Collections.sort(tree);
 			Ocl2Boogie.init(tarmm);
 			PrintStream out;
-			String folderName = "HSM2FSM/SubGoals/";
+
+			String goalName = post.getCommentsBefore().get(0).replace("--", "")+"/";
+			String folerName = String.format("%s%s", subGoalsPath,goalName);
+			File file = new File(folerName); 
+			FileUtils.forceMkdir(file);
+			
 			int i = 0;
 			for(Node n : NodeHelper.findLeafs(tree)){
-				String fileName = String.format("%scase%02d.bpl", folderName, i);
+				String fileName = String.format("%scase%02d.bpl", folerName,i);
 				out =  new PrintStream(new FileOutputStream(fileName));
 				System.setOut(out);
 				System.out.println(n.toBoogie(env));
 			
 				i++;
 			}
-			
-			
-			GenBy.init(rules,srcmm);
-			String path = "HSM2FSM/SubGoals/";
-			GenBy.print(path);
-			
-			
+				
 		}
 		
-
+		GenBy.init(rules,srcmm);
+		GenBy.print(genByPath);
 
 		
 
