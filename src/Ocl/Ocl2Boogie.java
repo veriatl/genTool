@@ -64,9 +64,9 @@ public class Ocl2Boogie {
 		OclExpression loopSrc = expr.getSource();
 
 		if (expr.getName().toLowerCase().equals("forall")) {		
-			rtn = String.format("(forall %s: ref :: %s ==> %s)", bv.getVarName(), print(loopSrc), print(loopBody));	
+			rtn = String.format("(forall %s: ref :: Seq#Contains(%s, %s) ==> %s)", bv.getVarName(), print(loopSrc), bv.getVarName(), print(loopBody));	
 		}else if (expr.getName().toLowerCase().equals("exists")) {	
-			rtn = String.format("(exists %s: ref :: %s && %s))", bv.getVarName(), print(loopSrc), print(loopBody));	
+			rtn = String.format("(exists %s: ref :: Seq#Contains(%s, %s) && %s))", bv.getVarName(), print(loopSrc), bv.getVarName(), print(loopBody));	
 		}	
 
 		

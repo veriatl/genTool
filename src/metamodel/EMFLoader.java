@@ -22,9 +22,9 @@ public class EMFLoader {
 		rs.getResourceFactoryRegistry().getExtensionToFactoryMap().put("ecore", new EcoreResourceFactoryImpl());
 
 		Metamodel metaModel = EmftvmFactory.eINSTANCE.createMetamodel();
-		metaModel.setResource(rs.getResource(URI.createURI(metamodelPath), true));
+		metaModel.setResource(rs.getResource(URI.createFileURI(metamodelPath), true));
 
-		Resource r = rs.getResource(URI.createURI(metamodelPath), true);
+		Resource r = rs.getResource(URI.createFileURI(metamodelPath), true);
 		EObject eObject = r.getContents().get(0);
 		if (eObject instanceof EPackage) {
 			EPackage p = (EPackage) eObject;

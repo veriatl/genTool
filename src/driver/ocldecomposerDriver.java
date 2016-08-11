@@ -1,6 +1,7 @@
 package driver;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -58,6 +59,7 @@ public class ocldecomposerDriver {
 		
 		
 		for (OclExpression post : postconditions) {
+			
 			ArrayList<Node> tree = new ArrayList<Node>();
 			Introduction.init(env, trace, tree, tarmm);
 			
@@ -108,26 +110,64 @@ public class ocldecomposerDriver {
 			PrintStream out;
 
 			String goalName = post.getCommentsBefore().get(0).replace("--", "")+"/";
-			String folerName = String.format("%s%s", subGoalsPath,goalName);
-			File file = new File(folerName); 
+			String folderName = String.format("%s%s", subGoalsPath,goalName);
+			File file = new File(folderName); 
 			FileUtils.forceMkdir(file);
 			
 			int i = 0;
 			for(Node n : NodeHelper.findLeafs(tree)){
-				String fileName = String.format("%scase%02d.bpl", folerName,i);
+				String fileName = String.format("%scase%02d.bpl", folderName,i);
 				out =  new PrintStream(new FileOutputStream(fileName));
 				System.setOut(out);
 				System.out.println(n.toBoogie(env));
 			
 				i++;
 			}
-				
+			
+			printDriver(env, post, folderName);
 		}
+		
+		
 		
 		GenBy.init(rules,srcmm);
 		GenBy.print(genByPath);
 
-		
-
 	}
+
+	private static void printDriver(ExecEnv env, OclExpression post, String folderName) throws Exception {
+		String fileName = String.format("%soriginal.bpl", folderName);
+		PrintStream out =  new PrintStream(new FileOutputStream(fileName));
+		System.setOut(out);
+		
+		printDriverHeader();
+		for(org.eclipse.m2m.atl.emftvm.Rule r : env.getRules()){
+			System.out.println(String.format("call %s_matchAll();", r.getName()));
+		}
+		for(org.eclipse.m2m.atl.emftvm.Rule r : env.getRules()){
+			System.out.println(String.format("call %s_applyAll();", r.getName()));
+		}
+		System.out.println();
+		printPost(post);
+		printDriverFooter();
+	}
+
+
+
+	private static void printPost(OclExpression post) {
+		System.out.println(String.format("assert %s;", Ocl2Boogie.print(post)));
+		
+	}
+
+	private static void printDriverHeader() {
+		System.out.println("implementation driver(){");
+		System.out.println("call init_tar_model(); ");
+		
+	}
+	
+	private static void printDriverFooter() {
+		System.out.println("}");
+	}
+	
+	
+	
 }

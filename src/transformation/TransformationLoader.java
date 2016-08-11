@@ -28,8 +28,8 @@ public static String atlEcore = "src/metamodel/ATL.ecore";
 		AtlParser atlParser = AtlParser.getDefault();
 		IModel m = atlParser.parseToModel(input);
 		
-		IExtractor extractor = new EMFExtractor();
-		extractor.extract(m, contractPath+".xmi");
+		//IExtractor extractor = new EMFExtractor();
+		//extractor.extract(m, contractPath+".xmi");
 		
 		ArrayList<MatchedRule> rtn = new ArrayList<MatchedRule>();
 		

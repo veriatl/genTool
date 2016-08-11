@@ -42,10 +42,10 @@ public class Trace {
 		if(sourceId!=""){
 			// Load metamodels
 			Metamodel metaModel = EmftvmFactory.eINSTANCE.createMetamodel();
-			metaModel.setResource(rs.getResource(URI.createURI(sourceMMPath), true));
+			metaModel.setResource(rs.getResource(URI.createFileURI(sourceMMPath), true));
 			env.registerMetaModel(sourceId, metaModel);
 
-			Resource r = rs.getResource(URI.createURI(sourceMMPath), true);
+			Resource r = rs.getResource(URI.createFileURI(sourceMMPath), true);
 			EObject eObject = r.getContents().get(0);
 			if (eObject instanceof EPackage) {
 			    EPackage p = (EPackage)eObject;
@@ -56,10 +56,10 @@ public class Trace {
 		if(targetId!=""){
 			// Load metamodels
 			Metamodel metaModel = EmftvmFactory.eINSTANCE.createMetamodel();
-			metaModel.setResource(rs.getResource(URI.createURI(targetMMPath), true));
+			metaModel.setResource(rs.getResource(URI.createFileURI(targetMMPath), true));
 			env.registerMetaModel(targetId, metaModel);
 
-			Resource r = rs.getResource(URI.createURI(targetMMPath), true);
+			Resource r = rs.getResource(URI.createFileURI(targetMMPath), true);
 			EObject eObject = r.getContents().get(0);
 			if (eObject instanceof EPackage) {
 			    EPackage p = (EPackage)eObject;
