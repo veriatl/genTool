@@ -230,7 +230,7 @@ public class Node implements Comparable {
 		}
 		
 		for(EObject entry : this.getInfers()){
-			rtn += String.format("assert %s;\n",  Ocl2Boogie.print(entry));
+			rtn += String.format("assume %s;\n",  Ocl2Boogie.print(entry));
 		}
 		
 		
