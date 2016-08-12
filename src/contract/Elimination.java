@@ -147,7 +147,7 @@ public class Elimination {
 			
 			
 			
-			if(trace.get(elemType).size()>0){
+			if(trace.get(elemType)!=null && trace.get(elemType).size()>0){
 				
 				String first = trace.get(elemType).get(0);
 				
@@ -189,7 +189,7 @@ public class Elimination {
 			String colType = TypeInference.infer(col, tarmm);
 			String elemType = TypeInference.getElemType(colType);
 			
-			if(trace.get(elemType).size()>0){
+			if(trace.get(elemType)!=null && trace.get(elemType).size()>0){
 				String first = trace.get(elemType).get(0);
 				
 				OperationCallExp c1 = make.createOperationCallExp();
