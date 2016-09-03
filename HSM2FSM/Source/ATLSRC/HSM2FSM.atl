@@ -1,4 +1,4 @@
--- @atlcompiler emftvm
+-- @atlcompiler atl2010
  
 module HSM2FSM;
 

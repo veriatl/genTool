@@ -7,8 +7,10 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
 import org.eclipse.emf.ecore.EObject;
@@ -235,6 +237,8 @@ public class Driver {
 			FileUtils.forceMkdir(file);
 			
 			int i = 0;
+			Set<String> relatedRules = new HashSet<String>();
+			
 			for(Node n : NodeHelper.findLeafs(tree)){
 				//gen sub-goals
 				String fileName = String.format("%scase%02d.bpl", folderName,i);
@@ -255,11 +259,15 @@ public class Driver {
 					res.get(goalName).add(currNode);
 				}
 				
+				
+				relatedRules.addAll(n.getInvolvedRuls());
+				
+				
 				i++;
 			}
 						
 			printDriver(env, post, folderName);
-
+			printOptDriver(env, post, folderName,relatedRules);
 		}
 
 		GenBy.init(rules,srcmm);
@@ -283,6 +291,26 @@ public class Driver {
 		return args.toArray(new String[0]);
 	}
 
+	private static void printOptDriver(ExecEnv env, OclExpression post, String folderName, Set<String> relatedRules) throws Exception {
+		String fileName = String.format("%sopt_original.bpl", folderName);
+		PrintStream out =  new PrintStream(new FileOutputStream(fileName));
+		System.setOut(out);
+		
+		printDriverHeader();
+		for(org.eclipse.m2m.atl.emftvm.Rule r : env.getRules()){
+			if(relatedRules.contains(r.getName())){
+				System.out.println(String.format("call %s_matchAll();", r.getName()));
+			}
+		}
+		for(org.eclipse.m2m.atl.emftvm.Rule r : env.getRules()){
+			if(relatedRules.contains(r.getName())){
+				System.out.println(String.format("call %s_applyAll();", r.getName()));
+			}
+		}
+		System.out.println();
+		printPost(post);
+		printDriverFooter();
+	}
 	
 	private static void printDriver(ExecEnv env, OclExpression post, String folderName) throws Exception {
 		String fileName = String.format("%soriginal.bpl", folderName);
