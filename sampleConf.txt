@@ -1,0 +1,10 @@
+C:/Users/zcheng/git/Compiler.VeriATL/veriatl.compiler.cs.nuim.ie/HSM2FSM_EXP/Source/EMFTVM/
+HSM2FSM
+C:/Users/zcheng/git/Compiler.VeriATL/veriatl.compiler.cs.nuim.ie/HSM2FSM_EXP/Source/SRCMM/HSM.ecore
+C:/Users/zcheng/git/Compiler.VeriATL/veriatl.compiler.cs.nuim.ie/HSM2FSM_EXP/Source/TARMM/FSM.ecore
+HSM
+FSM
+C:/Users/zcheng/git/Compiler.VeriATL/veriatl.compiler.cs.nuim.ie/HSM2FSM_EXP/Source/ContractSRC/HSM2FSMContract.atl
+C:/Users/zcheng/git/Compiler.VeriATL/veriatl.compiler.cs.nuim.ie/HSM2FSM_EXP/Source/ATLSRC/HSM2FSM.atl
+C:/Users/zcheng/git/Compiler.VeriATL/veriatl.compiler.cs.nuim.ie/HSM2FSM_EXP/Sub-goals/
+C:/Users/zcheng/git/Compiler.VeriATL/veriatl.compiler.cs.nuim.ie/HSM2FSM_EXP/Sub-goals/
