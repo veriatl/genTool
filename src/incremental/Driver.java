@@ -79,6 +79,8 @@ public class Driver {
 		mutatorId.put(MF6, "MF6");
 		mutatorId.put(MT2, "MT2");
 		
+		
+		
 		for(Map<String, List<IdNode>> mutant : mutations){
 			
 			int total = 0;
@@ -86,7 +88,13 @@ public class Driver {
 			
 			
 			for (String goal : mutant.keySet()) {
-				for (IdNode n : mutant.get(goal)) {				
+				
+				
+				
+				for (IdNode n : mutant.get(goal)) {			
+					
+					
+					
 					if(!n.getNode().getInvolvedRuls().contains(mutator.get(mutant))){
 						IdNode srcNode = find(n, src.get(goal));
 						if (srcNode != null) {
@@ -120,6 +128,15 @@ public class Driver {
 			
 					total++;
 				}
+				
+				if(optCanReuse(mutant.get(goal), src.get(goal), mutator.get(mutant))){
+					String fileName = String.format("RES/opt_%s.txt", mutatorId.get(mutant));
+					PrintStream out =  new PrintStream(new FileOutputStream(fileName, true));
+					System.setOut(out);
+					System.out.printf("/Sub-goals/%s%s.bpl\n", goal, "original");
+				}
+				
+				
 			}
 
 			//original.println(String.format("%s:%s: %s", mutatorId.get(mutant), total, succ));
@@ -128,6 +145,24 @@ public class Driver {
 		
 		
 	
+	}
+
+	private static boolean optCanReuse(List<IdNode> mutant, List<IdNode> original, String op) {
+
+		Set<String> relatedRules4Mutant = new HashSet<String>();
+		Set<String> relatedRules4Org = new HashSet<String>();
+		
+		for(IdNode n : mutant){
+			relatedRules4Mutant.addAll(n.getNode().getInvolvedRuls());
+		}
+		
+		for(IdNode n : original){
+			relatedRules4Org.addAll(n.getNode().getInvolvedRuls());
+		}
+		
+		return relatedRules4Org.containsAll(relatedRules4Mutant)
+				&& relatedRules4Mutant.containsAll(relatedRules4Org)
+				&& !relatedRules4Mutant.contains(op);
 	}
 
 	private static boolean compareExpressionLists(List<EObject> l1, List<EObject> l2) {
@@ -237,7 +272,7 @@ public class Driver {
 			FileUtils.forceMkdir(file);
 			
 			int i = 0;
-			Set<String> relatedRules = new HashSet<String>();
+			Set<String> relatedRules = new HashSet<String>();	// not need
 			
 			for(Node n : NodeHelper.findLeafs(tree)){
 				//gen sub-goals
@@ -260,14 +295,14 @@ public class Driver {
 				}
 				
 				
-				relatedRules.addAll(n.getInvolvedRuls());
+				relatedRules.addAll(n.getInvolvedRuls());	// not need
 				
 				
 				i++;
 			}
 						
 			printDriver(env, post, folderName);
-			printOptDriver(env, post, folderName,relatedRules);
+			printOptDriver(env, post, folderName,relatedRules);	// not need
 		}
 
 		GenBy.init(rules,srcmm);
@@ -291,6 +326,7 @@ public class Driver {
 		return args.toArray(new String[0]);
 	}
 
+	// not need
 	private static void printOptDriver(ExecEnv env, OclExpression post, String folderName, Set<String> relatedRules) throws Exception {
 		String fileName = String.format("%sopt_original.bpl", folderName);
 		PrintStream out =  new PrintStream(new FileOutputStream(fileName));
