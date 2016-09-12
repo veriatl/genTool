@@ -40,6 +40,15 @@ public class Driver {
 	
 	
 	public static void main(String[] args) throws Exception {
+		
+		String resPath = "RES/";
+		
+		if (new File(resPath).exists()) {
+		    FileUtils.cleanDirectory(new File(resPath));
+		}else{
+			FileUtils.forceMkdir(new File(resPath));
+		}
+		
 		PrintStream original = new PrintStream(System.out);
 		
 		Map<String, List<IdNode>> src = load(genConf("HSM2FSM"));
@@ -50,7 +59,7 @@ public class Driver {
 		Map<String, List<IdNode>> DR1 = load(genConf("DR1"));
 		Map<String, List<IdNode>> MB6 = load(genConf("MB6"));
 		Map<String, List<IdNode>> MF6 = load(genConf("MF6"));
-		Map<String, List<IdNode>> MT2 = load(genConf("MT2"));
+
 		
 		List<Map<String, List<IdNode>>> mutations = new ArrayList<Map<String, List<IdNode>>>();
 		mutations.add(AF2);
@@ -59,7 +68,7 @@ public class Driver {
 		mutations.add(DR1);
 		mutations.add(MB6);
 		mutations.add(MF6);
-		mutations.add(MT2);
+
 		
 		Map<Map<String, List<IdNode>>, String> mutator = new HashMap<Map<String, List<IdNode>>, String>();
 		mutator.put(AF2, "RS2RS");
@@ -68,7 +77,7 @@ public class Driver {
 		mutator.put(DR1, "SM2SM");
 		mutator.put(MB6, "T2TB");
 		mutator.put(MF6, "T2TB");
-		mutator.put(MT2, "RS2RS");
+
 		
 		Map<Map<String, List<IdNode>>, String> mutatorId = new HashMap<Map<String, List<IdNode>>, String>();
 		mutatorId.put(AF2, "AF2");
@@ -77,7 +86,7 @@ public class Driver {
 		mutatorId.put(DR1, "DR1");
 		mutatorId.put(MB6, "MB6");
 		mutatorId.put(MF6, "MF6");
-		mutatorId.put(MT2, "MT2");
+
 		
 		
 		

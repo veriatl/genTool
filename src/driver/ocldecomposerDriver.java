@@ -56,7 +56,9 @@ public class ocldecomposerDriver {
 		List<OclExpression> postconditions = ContractLoader.init(contractPath);
 		List<MatchedRule> rules = TransformationLoader.init(transformationSrcPath);
 		
-		
+		if(new File(subGoalsPath).exists()){
+			FileUtils.cleanDirectory(new File(subGoalsPath));
+		}
 		
 		for (OclExpression post : postconditions) {
 			
