@@ -42,6 +42,9 @@ public class ocldecomposerDriver {
 	
 	// the most difficulty part is type inference, and deep copy of objects.
 	public static void main(String[] args) throws Exception {
+		long start = System.currentTimeMillis();
+		PrintStream original = System.out;
+		
 		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
 		EPackage tarmm = EMFLoader.loadEcore(args[3]);
 		EPackage srcmm = EMFLoader.loadEcore(args[2]);
@@ -134,6 +137,10 @@ public class ocldecomposerDriver {
 		GenBy.init(rules,srcmm);
 		GenBy.print(genByPath);
 
+		
+		System.setOut(original);
+		long end = System.currentTimeMillis();
+		System.out.println(end-start);
 	}
 
 	private static void printDriver(ExecEnv env, OclExpression post, String folderName) throws Exception {
