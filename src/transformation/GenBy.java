@@ -29,6 +29,8 @@ public class GenBy {
 	}
 
 	public static void print(String path) throws FileNotFoundException {
+		PrintStream original = new PrintStream(System.out);
+		
 		String fName = path + "genBy.bpl";
 		PrintStream out = new PrintStream(new FileOutputStream(fName));
 		System.setOut(out);
@@ -47,6 +49,8 @@ public class GenBy {
 			printFilter(r, replacers);
 			printAxiomFooter();
 		}
+		out.close();
+		System.setOut(original);
 	}
 
 	private static Map<String, String> getInputsTypes(MatchedRule r) {

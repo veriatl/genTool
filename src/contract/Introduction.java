@@ -191,12 +191,16 @@ public class Introduction  {
 			OclExpression lhs = expr.getSource();
 			OclExpression rhs = expr.getArguments().get(0);
 			
-			Node n1 = new Node(depth + 1, lhs, curr, Inferred, ProveOption.ANY, Tactic.OR_LEFT);
+			//TODO, Currently we do not branching, and always generate the left most expr into the proof tree.
+			Node n1 = new Node(depth + 1, lhs, curr, Inferred, ProveOption.EACH, Tactic.OR_LEFT);
 			tree.add(n1);
 			
-			
-			Node n2 = new Node(depth + 1, rhs, curr, Inferred, ProveOption.ANY, Tactic.OR_RIGHT);
-			tree.add(n2);
+//			Node n1 = new Node(depth + 1, lhs, curr, Inferred, ProveOption.ANY, Tactic.OR_LEFT);
+//			tree.add(n1);
+//			
+//			// this should be branching to all operands of or expr
+//			Node n2 = new Node(depth + 1, rhs, curr, Inferred, ProveOption.ANY, Tactic.OR_RIGHT);
+//			tree.add(n2);
 			
 			
 		}else if(expr.getOperationName().equals("not")){

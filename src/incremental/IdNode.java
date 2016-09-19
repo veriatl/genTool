@@ -14,4 +14,8 @@ public class IdNode {
 	public Node getNode(){
 		return this.n;
 	}
+	
+	public String getId(){
+		return this.id;
+	}
 }

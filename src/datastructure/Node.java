@@ -23,6 +23,7 @@ public class Node implements Comparable {
 	HashMap<EObject, ContextEntry> context;
 	ProveOption rel2Parent;
 	Tactic ruleApplied;
+	TriBoolean res;
 	
 	public Node(int lv, OclExpression ct, Node pt, HashMap<EObject, ContextEntry> ctx, ProveOption rel, Tactic rule){
 		this.level = lv;
@@ -31,8 +32,19 @@ public class Node implements Comparable {
 		this.context = ctx;
 		this.rel2Parent = rel;
 		this.ruleApplied = rule;
+		this.res = TriBoolean.UNKNOWN;
 	}
 
+	
+	public TriBoolean getResult() {
+		return this.res;
+	}
+
+	public void setResult(TriBoolean r) {
+		this.res = r;
+	}
+	
+	
 	public int getLevel() {
 		return level;
 	}
@@ -192,7 +204,8 @@ public class Node implements Comparable {
 			h =Integer.toHexString(parent.hashCode());
 		}
 		
-		return String.format("Lv: %d\n Node: %s, Parent: %s\nctx: [%s], \n===\nGoal: %s, \napplied %s", level, Integer.toHexString(this.hashCode()), h, ctx, Printer.print(content), ruleApplied);
+		return String.format("Lv: %d\n Node: %s, Parent: %s\nctx: [%s], \n===\nGoal: %s, \napplied %s\nResult: %s\n", 
+				level, Integer.toHexString(this.hashCode()), h, ctx, Printer.print(content), ruleApplied, this.res.toString());
 	}
 	
 	public String toBoogie(ExecEnv env){

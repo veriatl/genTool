@@ -40,6 +40,7 @@ public class executioner {
 	
 	public static VerificationResult verify(String postName, String nodeName) throws Exception {
 		String id = String.format("%s-%s-%s", proj,postName,nodeName);
+		nodeName +=".bpl";
 		
 		List<String> params = new ArrayList<String>();
 		params.add("Boogie");
@@ -75,15 +76,15 @@ public class executioner {
         }
 
         input.close();
-        return new VerificationResult(id, res, end-start);
+        return new VerificationResult(id, Boolean.toString(res), end-start);
 	}
 	
 	
 	
 	
 	public static void main(String[] args) throws Exception {
-		init("HSM2FSM");
-		System.out.print(verify("fsm_transition_src_multi_lower", "original.bpl"));
-		
+		init("TEST");
+		System.out.println(verify("fsm_transition_trg_multi_lower", "simplified"));
+		System.out.println(verify("fsm_transition_trg_multi_lower", "original"));
 	}
 }
