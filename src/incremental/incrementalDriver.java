@@ -46,7 +46,7 @@ public class incrementalDriver {
 	public static void main(String[] args) throws Exception {
 
 		init();
-		IncrementalResult hsm2fsmRes = verify_initial("HSM2FSM");
+		IncrementalResult hsm2fsmRes = verify_loc("HSM2FSM");
 		inc_verify_post_cache("HSM2FSM", "TEST", "IS2IS", hsm2fsmRes, true);
 	}
 
@@ -55,14 +55,37 @@ public class incrementalDriver {
 		CachePosts = new HashMap<String, HashMap<String, String>>();
 	}
 
-	public static IncrementalResult verify_initial(String srcProj) throws Exception {
+	public static void verify_org(String srcProj) throws Exception {
+		long start = System.currentTimeMillis();
+		
+		IncrementalResult src = load(genConf(srcProj));
+		executioner.init(srcProj);
 
+		for (String post : src.getLeafs4Posts().keySet()) {
+
+			VerificationResult postV = executioner.verify(post, "original");	
+			putInCachePosts(srcProj, post, postV.getResult());
+
+		}
+
+		long end = System.currentTimeMillis();
+		
+		System.out.println(String.format("%s: %s", srcProj, end-start));
+		
+	}
+	
+	
+	public static IncrementalResult verify_loc(String srcProj) throws Exception {
+		long start = System.currentTimeMillis();
+		
 		IncrementalResult src = load(genConf(srcProj));
 		executioner.init(srcProj);
 
 		for (String post : src.getLeafs4Posts().keySet()) {
 
 			VerificationResult postV = executioner.verify(post, "original");
+			
+			
 			putInCachePosts(srcProj, post, postV.getResult());
 
 			if (postV.getResult().equals("true")) {
@@ -83,12 +106,19 @@ public class incrementalDriver {
 
 		}
 
+		long end = System.currentTimeMillis();
+		
+		System.out.println(String.format("%s: %s", srcProj, end-start));
 		return src;
 	}
 
+	
+	// TODO some optimization ?
 	public static IncrementalResult inc_verify_sub(String srcProj, String tarProj, String opRule, IncrementalResult src)
 			throws Exception {
 
+		long start = System.currentTimeMillis();
+		
 		IncrementalResult tar = load(genConf(tarProj));
 
 		executioner.init(tarProj);
@@ -97,8 +127,8 @@ public class incrementalDriver {
 			VerificationResult postV = executioner.verify(post, "original");
 
 			if (postV.getResult().equals("true")) {
-				// TODO some optimization ?
-				System.out.println(postV);
+				
+				//System.out.println(postV);
 			} else {
 				for (IdNode subgoal : tar.getLeafs4Posts().get(post)) {
 					IdNode cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
@@ -108,16 +138,20 @@ public class incrementalDriver {
 						putInCacheSubs(tarProj, post, subgoal.getId(), res);
 
 						String id = String.format("%s-%s-%s", tarProj, post, subgoal.getId());
-						System.out.println(new VerificationResult(id, "Cached:" + res, 0));
+						//System.out.println(new VerificationResult(id, "Cached:" + res, 0));
 					} else {
 						VerificationResult res = executioner.verify(post, subgoal.getId());
 						putInCacheSubs(tarProj, post, subgoal.getId(), res.getResult());
-						System.out.println(res);
+						//System.out.println(res);
 					}
 				}
 			}
 		}
 
+		long end = System.currentTimeMillis();
+		
+		System.out.println(String.format("%s: %s", tarProj, end-start));
+		
 		return tar;
 	}
 
