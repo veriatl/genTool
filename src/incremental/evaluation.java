@@ -55,7 +55,7 @@ public class evaluation {
 	
 	}
 	
-	//bug
+	
 	public static void INC_SUB() throws Exception{
 		incrementalDriver.init();
 		IncrementalResult hsm2fsmRes = incrementalDriver.verify_loc("HSM2FSM");
