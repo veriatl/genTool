@@ -85,6 +85,6 @@ public class executioner {
 	public static void main(String[] args) throws Exception {
 		init("TEST");
 		System.out.println(verify("fsm_transition_trg_multi_lower", "simplified"));
-		System.out.println(verify("fsm_transition_trg_multi_lower", "original"));
+		
 	}
 }

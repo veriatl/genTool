@@ -39,206 +39,274 @@ import transformation.Trace;
 import transformation.TransformationLoader;
 
 public class incrementalDriver {
-	
-	public static void main(String[] args) throws Exception {
-		//inc_verify_sub("HSM2FSM", "TEST", "RS2RS");
-		inc_verify_post_cache("HSM2FSM", "TEST", "RS2RS");
-	}
-	
-	
-	public static void inc_verify_sub(String srcProj, String tarProj, String opRule) throws Exception{
 
-		
+	static HashMap<String, HashMap<String, HashMap<String, String>>> CacheSubs;
+	static HashMap<String, HashMap<String, String>> CachePosts;
+
+	public static void main(String[] args) throws Exception {
+
+		init();
+		IncrementalResult hsm2fsmRes = verify_initial("HSM2FSM");
+		inc_verify_post_cache("HSM2FSM", "TEST", "IS2IS", hsm2fsmRes);
+	}
+
+	public static void init() {
+		CacheSubs = new HashMap<String, HashMap<String, HashMap<String, String>>>();
+		CachePosts = new HashMap<String, HashMap<String, String>>();
+	}
+
+	public static IncrementalResult verify_initial(String srcProj) throws Exception {
+
 		IncrementalResult src = load(genConf(srcProj));
+		executioner.init(srcProj);
+
+		for (String post : src.getLeafs4Posts().keySet()) {
+
+			VerificationResult postV = executioner.verify(post, "original");
+			putInCachePosts(srcProj, post, postV.getResult());
+
+			if (postV.getResult().equals("true")) {
+
+				for (IdNode subgoal : src.getLeafs4Posts().get(post)) {
+					putInCacheSubs(srcProj, post, subgoal.getId(), "true");
+				}
+
+				//System.out.println(postV);
+			} else {
+
+				for (IdNode subgoal : src.getLeafs4Posts().get(post)) {
+					VerificationResult r = executioner.verify(post, subgoal.getId());
+					putInCacheSubs(srcProj, post, subgoal.getId(), r.getResult());
+					//System.out.println(r);
+
+				}
+
+			}
+
+		}
+
+		return src;
+	}
+
+	public static IncrementalResult inc_verify_sub(String srcProj, String tarProj, String opRule, IncrementalResult src)
+			throws Exception {
+
 		IncrementalResult tar = load(genConf(tarProj));
-		
-		
+
 		executioner.init(tarProj);
-		for(String post : tar.getLeafs4Posts().keySet()){
-			
-			VerificationResult postV = executioner.verify(post,"original");
-			if(postV.getResult().equals("true")){
+		for (String post : tar.getLeafs4Posts().keySet()) {
+
+			VerificationResult postV = executioner.verify(post, "original");
+
+			if (postV.getResult().equals("true")) {
+				// TODO some optimization ?
 				System.out.println(postV);
-			}else{
-				for (IdNode subgoal : tar.getLeafs4Posts().get(post)) {			
-					if(findInCache(subgoal, src.getLeafs4Posts().get(post))!=null && !subgoal.getNode().getInvolvedRuls().contains(opRule)){
-						String id = String.format("%s-%s-%s", tarProj,post,subgoal.getId());		
-						System.out.println(new VerificationResult(id, "Cached", 0));
-					}else{
-						System.out.println(executioner.verify(post, subgoal.getId()));
+			} else {
+				for (IdNode subgoal : tar.getLeafs4Posts().get(post)) {
+					IdNode cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
+					if (cache != null && !subgoal.getNode().getInvolvedRuls().contains(opRule)) {
+
+						String res = findInCacheSubs(srcProj, post, cache.getId());
+						putInCacheSubs(tarProj, post, subgoal.getId(), res);
+
+						String id = String.format("%s-%s-%s", tarProj, post, subgoal.getId());
+						System.out.println(new VerificationResult(id, "Cached:" + res, 0));
+					} else {
+						VerificationResult res = executioner.verify(post, subgoal.getId());
+						putInCacheSubs(tarProj, post, subgoal.getId(), res.getResult());
+						System.out.println(res);
 					}
 				}
 			}
 		}
 
+		return tar;
 	}
-	
-	
-	public static void inc_verify_post_cache(String srcProj, String tarProj, String opRule) throws Exception{
 
-		
-		IncrementalResult src = load(genConf(srcProj));
+	public static void inc_verify_post_cache(String srcProj, String tarProj, String opRule, IncrementalResult src)
+			throws Exception {
+
 		IncrementalResult tar = load(genConf(tarProj));
 
-		
 		executioner.init(tarProj);
-		
-		for(String post : tar.getLeafs4Posts().keySet()){
+
+		for (String post : tar.getLeafs4Posts().keySet()) {
+			long start = System.currentTimeMillis();
 			Set<String> r1 = src.getRules4Posts().get(post);
 			Set<String> r2 = tar.getRules4Posts().get(post);
-			if(r1.containsAll(r2) && r2.contains(r1) && !r2.contains(opRule)){
-				//cached
-			}else{
+			if (r1.containsAll(r2) && r2.containsAll(r1) && !r2.contains(opRule)) {
+				String res = findInCachePosts(srcProj, post);
+				putInCachePosts(tarProj, post, res);
 				
+				String id = String.format("%s-%s-original", tarProj, post);
+				System.out.println(new VerificationResult(id, res, 0));
+				
+			} else {
+
 				// get leaf res
-				for (IdNode subgoal : tar.getLeafs4Posts().get(post)) {			
-					if(findInCache(subgoal, src.getLeafs4Posts().get(post))!=null && !subgoal.getNode().getInvolvedRuls().contains(opRule)){
-						VerificationResult r = executioner.verify(post, subgoal.getId());
-						String v = r.getResult();
-						if(v.equals("true")){
+				for (IdNode subgoal : tar.getLeafs4Posts().get(post)) {
+					IdNode cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
+					if (cache != null && !subgoal.getNode().getInvolvedRuls().contains(opRule)) {
+
+						String res = CacheSubs.get(srcProj).get(post).get(cache.getId());
+
+						if (res.equals("true")) {
 							subgoal.getNode().setResult(TriBoolean.TRUE);
-						}else if(v.equals("false")){
+						} else if (res.equals("false")) {
 							subgoal.getNode().setResult(TriBoolean.FALSE);
 						}
-						
-					}else{
+
+					} else {
 						subgoal.getNode().setResult(TriBoolean.UNKNOWN);
 					}
 				}
-				
+
 				// populate tree
 				ArrayList<Node> tarTree = tar.getTrees4Posts().get(post);
 				ArrayList<Node> tarResultTree = new ArrayList<Node>();
-				
-				for(Node leaf : NodeHelper.findLeafs(tarTree)){
+
+				for (Node leaf : NodeHelper.findLeafs(tarTree)) {
 					tarResultTree.add(leaf);
 					tarTree.remove(leaf);
 				}
-				
-				while(tarTree.size()!=0){
-					for(Node leaf : NodeHelper.findLeafs(tarTree)){
+
+				while (tarTree.size() != 0) {
+					for (Node leaf : NodeHelper.findLeafs(tarTree)) {
 						ArrayList<Node> childrenOfLeaf = NodeHelper.findChildren(leaf, tarResultTree);
 						leaf.setResult(TriBoolean.compute(childrenOfLeaf));
 						tarResultTree.add(leaf);
 						tarTree.remove(leaf);
-					}	
+					}
 				}
-				
+
 				// find node
 				Node simPost = NodeHelper.findSimplifiedPost(tarResultTree);
-				//verify node
-				String simPostBpl = constructTask(tarProj, post, simPost, tar.getRules4Posts().get(post), tar.getEnv(), tar.getTarmm(), tar.getInfers4Posts());
+				// verify node
+				String simPostBpl = constructTask(tarProj, post, simPost, tar.getRules4Posts().get(post), tar.getEnv(),
+						tar.getTarmm(), tar.getInfers4Posts());
 				System.out.println();
-				
+
 				// update result and repopulate verification result tree
-				
+
 				VerificationResult simPostV = executioner.verify(post, simPostBpl);
-				simPost.setResult(simPostV.getTriBooleanResult());		
-				System.out.println(NodeHelper.repopulate(simPost, tarResultTree));
+				simPost.setResult(simPostV.getTriBooleanResult());
+				String fnRes = NodeHelper.repopulate(simPost, tarResultTree).toString().toLowerCase();
+
+				if (fnRes.equals("true")) {
+					for (IdNode n : tar.getLeafs4Posts().get(post)) {
+						putInCacheSubs(tarProj, post, n.getId(), "true");
+					}
+
+				}
+
+				long end = System.currentTimeMillis();
+
+				putInCachePosts(tarProj, post, fnRes);
+				String id = String.format("%s-%s-simplfied", tarProj, post);
+				System.out.println(new VerificationResult(id, fnRes, end - start));
 
 			}
 		}
-		
-
 
 	}
-	
-	
-	
-	
-	
-//	public static void inc_verify_post_nocache(String srcProj, String tarProj, String opRule) throws Exception{
-//
-//		
-//		Map<String, List<IdNode>> src = load(genConf(srcProj));
-//		Map<String, List<IdNode>> tar = load(genConf(tarProj));
-//
-//		
-//		executioner.init(tarProj);
-//		for(String post : tar.keySet()){
-//			
-//			VerificationResult postV = executioner.verify(post,"original");
-//			if(postV.getResult().equals("true")){
-//				System.out.println(postV);
-//			}else{
-//				for (IdNode subgoal : tar.get(post)) {			
-//					if(find(subgoal, src.get(post))!=null && !subgoal.getNode().getInvolvedRuls().contains(opRule)){
-//						String id = String.format("%s-%s-%s", tarProj,post,subgoal.getId());		
-//						System.out.println(new VerificationResult(id, "Cached", 0));
-//					}else{
-//						System.out.println(executioner.verify(post, subgoal.getId()));
-//					}
-//				}
-//			}
-//		}
-//
+
+// public static void inc_verify_post_nocache(String srcProj, String tarProj, String opRule, IncrementalResult src)
+//	// get leaf res
+//	for (IdNode subgoal : tar.getLeafs4Posts().get(post)) {
+//		subgoal.getNode().setResult(TriBoolean.UNKNOWN);
 //	}
-	
-	
-	private static String constructTask(String tarProj, String post, Node simPost, Set<String> rules, ExecEnv env, EPackage tarmm, Map<String, Map<String, String>> infers) throws Exception {
+
+
+
+	private static void putInCachePosts(String tarProj, String post, String res) {
+		if (CachePosts.containsKey(tarProj)) {
+			HashMap<String, String> c1 = CachePosts.get(tarProj);
+			c1.put(post, res);
+		} else {
+			HashMap<String, String> c1 = new HashMap<String, String>();
+			c1.put(post, res);
+			CachePosts.put(tarProj, c1);
+		}
+	}
+
+	private static void putInCacheSubs(String tarProj, String post, String sub, String res) {
+		if (CacheSubs.containsKey(tarProj)) {
+			HashMap<String, HashMap<String, String>> p1 = CacheSubs.get(tarProj);
+			if (p1.containsKey(post)) {
+				HashMap<String, String> s1 = p1.get(post);
+				s1.put(sub, res);
+			} else {
+				HashMap<String, String> s1 = new HashMap<String, String>();
+				s1.put(sub, res);
+				p1.put(post, s1);
+			}
+		} else {
+			HashMap<String, HashMap<String, String>> p1 = new HashMap<String, HashMap<String, String>>();
+			HashMap<String, String> s1 = new HashMap<String, String>();
+			s1.put(sub, res);
+			p1.put(post, s1);
+			CacheSubs.put(tarProj, p1);
+		}
+	}
+
+	private static String constructTask(String tarProj, String post, Node simPost, Set<String> rules, ExecEnv env,
+			EPackage tarmm, Map<String, Map<String, String>> infers) throws Exception {
 		PrintStream original = new PrintStream(System.out);
 		String folderName = String.format("%s/Sub-goals/%s", tarProj, post);
 		String fileName = String.format("%ssimplified.bpl", folderName);
-		PrintStream out =  new PrintStream(new FileOutputStream(fileName));
+		PrintStream out = new PrintStream(new FileOutputStream(fileName));
 		System.setOut(out);
 		Ocl2Boogie.init(tarmm);
-		
-		
-		
+
 		System.out.println("implementation driver(){\n");
-		
-		
-		for(EObject r : simPost.getBVs()){
+
+		for (EObject r : simPost.getBVs()) {
 			System.out.println(String.format("var %s: ref;\n", Ocl2Boogie.print(r)));
 			TypeInference.lookup.putAll(infers.get(post));
-			
+
 		}
-		
+
 		System.out.println("call init_tar_model();\n");
-		
+
 		ArrayList<String> order = Trace.ruleOrdered(env);
 		ArrayList<String> list = new ArrayList<String>();
-		
-		
-		for(String r : order){
-			if(rules.contains(r)){
+
+		for (String r : order) {
+			if (rules.contains(r)) {
 				list.add(r);
-			}	
+			}
 		}
-		
-		for(String r : list){
+
+		for (String r : list) {
 			System.out.println(String.format("call %s_matchAll();", r));
 		}
-		for(String r : list){
+		for (String r : list) {
 			System.out.println(String.format("call %s_applyAll();", r));
 		}
-		
+
 		System.out.println();
-		
-		for(EObject entry : simPost.getAssumptions()){
-			System.out.println(String.format("assume %s;\n",  Ocl2Boogie.print(entry)));
+
+		for (EObject entry : simPost.getAssumptions()) {
+			System.out.println(String.format("assume %s;\n", Ocl2Boogie.print(entry)));
 
 		}
-		
-		for(EObject entry : simPost.getInfers()){
-			System.out.println(String.format("assume %s;\n",  Ocl2Boogie.print(entry)));
+
+		for (EObject entry : simPost.getInfers()) {
+			System.out.println(String.format("assume %s;\n", Ocl2Boogie.print(entry)));
 
 		}
-		
-		
+
 		printPost(simPost.getContent());
 		printDriverFooter();
 		out.close();
-		
+
 		System.setOut(original);
-		
+
 		return "simplified";
 	}
 
-
-
-	//TODO this only suitable for our case study, make it more customized
-	private static String[] genConf(String proj){
+	// TODO this only suitable for our case study, make it more customized
+	private static String[] genConf(String proj) {
 		List<String> args = new ArrayList<String>();
 		args.add(String.format("%s/Source/EMFTVM/", proj));
 		args.add(String.format("HSM2FSM"));
@@ -252,9 +320,7 @@ public class incrementalDriver {
 		args.add(String.format("%s/Sub-goals/", proj));
 		return args.toArray(new String[0]);
 	}
-	
-	
-	
+
 	private static boolean compareExpressionLists(List<EObject> l1, List<EObject> l2) {
 
 		List<String> s1 = new ArrayList<String>();
@@ -271,7 +337,7 @@ public class incrementalDriver {
 		return s1.containsAll(s2) && s2.containsAll(s1);
 	}
 
-	private static IdNode findInCache(IdNode n, List<IdNode> nodes) {
+	private static IdNode findSubgoalInCache(IdNode n, List<IdNode> nodes) {
 
 		for (IdNode curr : nodes) {
 			boolean rule = n.getNode().getInvolvedRuls().containsAll(curr.getNode().getInvolvedRuls())
@@ -291,6 +357,14 @@ public class incrementalDriver {
 		return null;
 	}
 
+	private static String findInCacheSubs(String srcProj, String post, String id) {
+		return CacheSubs.get(srcProj).get(post).get(id);
+	}
+
+	private static String findInCachePosts(String srcProj, String post) {
+		return CachePosts.get(srcProj).get(post);
+	}
+
 	public static IncrementalResult load(String[] args) throws Exception {
 		PrintStream original = new PrintStream(System.out);
 		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
@@ -302,7 +376,7 @@ public class incrementalDriver {
 		String transformationSrcPath = args[7];
 		String subGoalsPath = args[8];
 		String genByPath = args[9];
-		
+
 		List<OclExpression> postconditions = ContractLoader.init(contractPath);
 		List<MatchedRule> rules = TransformationLoader.init(transformationSrcPath);
 
@@ -310,8 +384,7 @@ public class incrementalDriver {
 		Map<String, ArrayList<Node>> tree4Posts = new HashMap<String, ArrayList<Node>>();
 		Map<String, Set<String>> rules4Posts = new HashMap<String, Set<String>>();
 		Map<String, Map<String, String>> infers4Posts = new HashMap<String, Map<String, String>>();
-		
-		
+
 		for (OclExpression post : postconditions) {
 
 			ArrayList<Node> tree = new ArrayList<Node>();
@@ -356,31 +429,29 @@ public class incrementalDriver {
 
 			}
 
-			
-			
-			// print tree 
+			// print tree
 			Collections.sort(tree);
 			Ocl2Boogie.init(tarmm);
 			PrintStream out;
 
-			String goalName = post.getCommentsBefore().get(0).replace("--", "")+"/";
-			String folderName = String.format("%s%s", subGoalsPath,goalName);
-			File file = new File(folderName); 
+			String goalName = post.getCommentsBefore().get(0).replace("--", "") + "/";
+			String folderName = String.format("%s%s", subGoalsPath, goalName);
+			File file = new File(folderName);
 			FileUtils.forceMkdir(file);
-			
-			
-			
+
 			int i = 0;
-			Set<String> relatedRules = new HashSet<String>();	// get all related rules for a post
-			
-			for(Node n : NodeHelper.findLeafs(tree)){
-				//gen sub-goals
-				String fileName = String.format("%scase%02d.bpl", folderName,i);
-				out =  new PrintStream(new FileOutputStream(fileName));
+			Set<String> relatedRules = new HashSet<String>(); // get all related
+																// rules for a
+																// post
+
+			for (Node n : NodeHelper.findLeafs(tree)) {
+				// gen sub-goals
+				String fileName = String.format("%scase%02d.bpl", folderName, i);
+				out = new PrintStream(new FileOutputStream(fileName));
 				System.setOut(out);
 				System.out.println(n.toBoogie(env));
 				out.close();
-				
+
 				//
 				String id = String.format("case%02d", i);
 				IdNode currNode = new IdNode(id, n);
@@ -392,67 +463,62 @@ public class incrementalDriver {
 				} else {
 					leafs4Posts.get(goalName).add(currNode);
 				}
-				
-				
-				relatedRules.addAll(n.getInvolvedRuls());	
-				
-				
+
+				relatedRules.addAll(n.getInvolvedRuls());
+
 				i++;
 			}
-			
+
 			tree4Posts.put(goalName, tree);
 			rules4Posts.put(goalName, relatedRules);
-			
-			Map<String,String> infers = new HashMap<String,String>(TypeInference.lookup);
+
+			Map<String, String> infers = new HashMap<String, String>(TypeInference.lookup);
 			infers4Posts.put(goalName, infers);
-			
-			
+
 			printDriver(env, post, folderName);
 
 		}
 
-		GenBy.init(rules,srcmm);
+		GenBy.init(rules, srcmm);
 		GenBy.print(genByPath);
-		
+
 		System.setOut(original);
-		return new IncrementalResult(leafs4Posts,tree4Posts,rules4Posts, env, tarmm, infers4Posts);
+		return new IncrementalResult(leafs4Posts, tree4Posts, rules4Posts, env, tarmm, infers4Posts);
 	}
-	
+
 	private static void printDriver(ExecEnv env, OclExpression post, String folderName) throws Exception {
 		PrintStream original = new PrintStream(System.out);
-		
+
 		String fileName = String.format("%soriginal.bpl", folderName);
-		PrintStream out =  new PrintStream(new FileOutputStream(fileName));
+		PrintStream out = new PrintStream(new FileOutputStream(fileName));
 		System.setOut(out);
-		
+
 		printDriverHeader();
-		for(org.eclipse.m2m.atl.emftvm.Rule r : env.getRules()){
+		for (org.eclipse.m2m.atl.emftvm.Rule r : env.getRules()) {
 			System.out.println(String.format("call %s_matchAll();", r.getName()));
 		}
-		for(org.eclipse.m2m.atl.emftvm.Rule r : env.getRules()){
+		for (org.eclipse.m2m.atl.emftvm.Rule r : env.getRules()) {
 			System.out.println(String.format("call %s_applyAll();", r.getName()));
 		}
 		System.out.println();
 		printPost(post);
 		printDriverFooter();
 		out.close();
-		
+
 		System.setOut(original);
 	}
 
-
-
 	private static void printPost(OclExpression post) {
 		System.out.println(String.format("assert %s;", Ocl2Boogie.print(post)));
-		
+
 	}
 
 	private static void printDriverHeader() {
 		System.out.println("implementation driver(){");
 		System.out.println("call init_tar_model(); ");
-		
+
 	}
-	
+
 	private static void printDriverFooter() {
 		System.out.println("}");
 	}
