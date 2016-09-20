@@ -17,13 +17,16 @@ public class IncrementalResult {
 	Map<String, Set<String>> rules4Posts;
 	ExecEnv env;
 	EPackage tarmm;
+	Map<String, Map<String, String>> infers4Posts;
 	
-	public IncrementalResult(Map<String, List<IdNode>> leafs, Map<String, ArrayList<Node>> tree, Map<String, Set<String>> rules, ExecEnv e, EPackage mm){
+	
+	public IncrementalResult(Map<String, List<IdNode>> leafs, Map<String, ArrayList<Node>> tree, Map<String, Set<String>> rules, ExecEnv e, EPackage mm, Map<String, Map<String, String>> i){
 		leafs4Posts = leafs;
 		trees4Posts = tree;
 		rules4Posts = rules;
 		env = e;
 		tarmm = mm;
+		infers4Posts = i;
 	}
 	
 	public Map<String, List<IdNode>> getLeafs4Posts() {
@@ -64,6 +67,14 @@ public class IncrementalResult {
 
 	public void setTarmm(EPackage tarmm) {
 		this.tarmm = tarmm;
+	}
+
+	public Map<String, Map<String, String>> getInfers4Posts() {
+		return infers4Posts;
+	}
+
+	public void setInfers4Posts(Map<String, Map<String, String>> infers4Posts) {
+		this.infers4Posts = infers4Posts;
 	}
 	
 }

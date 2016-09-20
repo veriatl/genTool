@@ -1,5 +1,7 @@
 package runtime;
 
+import datastructure.TriBoolean;
+
 public class VerificationResult {
 	String result;
 	long time;
@@ -19,5 +21,14 @@ public class VerificationResult {
 		return result;
 	}
 	
-	
+	public TriBoolean getTriBooleanResult(){
+		if(this.result.equals("true")){
+			return TriBoolean.TRUE;
+		}else if(this.result.equals("false")){
+			return TriBoolean.FALSE;
+		}else{
+			return TriBoolean.UNKNOWN;
+		}
+		
+	}
 }

@@ -84,8 +84,7 @@ public class Introduction  {
 
 			String bvType = TypeInference.getElemType(TypeInference.infer(loopSrc, tarmm));
 			TypeInference.lookup.put(Printer.print(bv), bvType);
-			
-			
+
 			// bv in src
 			OperationCallExp inclusion = make.createOperationCallExp();
 			inclusion.setOperationName("includes");

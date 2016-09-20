@@ -20,6 +20,7 @@ public class Node implements Comparable {
 	int level;
 	OclExpression content;
 	Node parent;
+	Node backUpParent;
 	HashMap<EObject, ContextEntry> context;
 	ProveOption rel2Parent;
 	Tactic ruleApplied;
@@ -253,4 +254,17 @@ public class Node implements Comparable {
 		
 		return rtn;
 	}
+
+
+	public Node getBackUpParent() {
+		return backUpParent;
+	}
+
+
+	public void setBackUpParent(Node backUpParent) {
+		this.backUpParent = backUpParent;
+	}
+
+
+
 }

@@ -20,9 +20,11 @@ import org.eclipse.m2m.atl.common.OCL.OclExpression;
 import org.eclipse.m2m.atl.emftvm.ExecEnv;
 
 import Ocl.Ocl2Boogie;
+import Ocl.TypeInference;
 import contract.ContractLoader;
 import contract.Elimination;
 import contract.Introduction;
+
 import datastructure.ContextEntry;
 import datastructure.IncrementalResult;
 import datastructure.Node;
@@ -125,11 +127,15 @@ public class incrementalDriver {
 				// find node
 				Node simPost = NodeHelper.findSimplifiedPost(tarResultTree);
 				//verify node
-				String simPostBpl = constructTask(tarProj, post, simPost, tar.getRules4Posts().get(post), tar.getEnv(), tar.getTarmm());
-				System.out.println(executioner.verify(post, simPostBpl));
+				String simPostBpl = constructTask(tarProj, post, simPost, tar.getRules4Posts().get(post), tar.getEnv(), tar.getTarmm(), tar.getInfers4Posts());
+				System.out.println();
 				
+				// update result and repopulate verification result tree
 				
-				
+				VerificationResult simPostV = executioner.verify(post, simPostBpl);
+				simPost.setResult(simPostV.getTriBooleanResult());		
+				System.out.println(NodeHelper.repopulate(simPost, tarResultTree));
+
 			}
 		}
 		
@@ -169,7 +175,7 @@ public class incrementalDriver {
 //	}
 	
 	
-	private static String constructTask(String tarProj, String post, Node simPost, Set<String> rules, ExecEnv env, EPackage tarmm) throws Exception {
+	private static String constructTask(String tarProj, String post, Node simPost, Set<String> rules, ExecEnv env, EPackage tarmm, Map<String, Map<String, String>> infers) throws Exception {
 		PrintStream original = new PrintStream(System.out);
 		String folderName = String.format("%s/Sub-goals/%s", tarProj, post);
 		String fileName = String.format("%ssimplified.bpl", folderName);
@@ -177,11 +183,15 @@ public class incrementalDriver {
 		System.setOut(out);
 		Ocl2Boogie.init(tarmm);
 		
+		
+		
 		System.out.println("implementation driver(){\n");
 		
 		
 		for(EObject r : simPost.getBVs()){
 			System.out.println(String.format("var %s: ref;\n", Ocl2Boogie.print(r)));
+			TypeInference.lookup.putAll(infers.get(post));
+			
 		}
 		
 		System.out.println("call init_tar_model();\n");
@@ -299,6 +309,8 @@ public class incrementalDriver {
 		Map<String, List<IdNode>> leafs4Posts = new HashMap<String, List<IdNode>>();
 		Map<String, ArrayList<Node>> tree4Posts = new HashMap<String, ArrayList<Node>>();
 		Map<String, Set<String>> rules4Posts = new HashMap<String, Set<String>>();
+		Map<String, Map<String, String>> infers4Posts = new HashMap<String, Map<String, String>>();
+		
 		
 		for (OclExpression post : postconditions) {
 
@@ -344,6 +356,8 @@ public class incrementalDriver {
 
 			}
 
+			
+			
 			// print tree 
 			Collections.sort(tree);
 			Ocl2Boogie.init(tarmm);
@@ -353,6 +367,8 @@ public class incrementalDriver {
 			String folderName = String.format("%s%s", subGoalsPath,goalName);
 			File file = new File(folderName); 
 			FileUtils.forceMkdir(file);
+			
+			
 			
 			int i = 0;
 			Set<String> relatedRules = new HashSet<String>();	// get all related rules for a post
@@ -387,6 +403,10 @@ public class incrementalDriver {
 			tree4Posts.put(goalName, tree);
 			rules4Posts.put(goalName, relatedRules);
 			
+			Map<String,String> infers = new HashMap<String,String>(TypeInference.lookup);
+			infers4Posts.put(goalName, infers);
+			
+			
 			printDriver(env, post, folderName);
 
 		}
@@ -395,7 +415,7 @@ public class incrementalDriver {
 		GenBy.print(genByPath);
 		
 		System.setOut(original);
-		return new IncrementalResult(leafs4Posts,tree4Posts,rules4Posts, env, tarmm);
+		return new IncrementalResult(leafs4Posts,tree4Posts,rules4Posts, env, tarmm, infers4Posts);
 	}
 	
 	private static void printDriver(ExecEnv env, OclExpression post, String folderName) throws Exception {

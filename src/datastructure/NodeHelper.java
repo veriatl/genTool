@@ -14,6 +14,9 @@ public class NodeHelper {
 		return null;
 	}
 	
+
+	
+	
 	public static ArrayList<Node> findLeafs(ArrayList<Node> tree){
 		
 		ArrayList<Node> nonLeafs = new ArrayList<Node>();
@@ -55,24 +58,54 @@ public class NodeHelper {
 		int count = 0;
 		Node next = null;
 		
-		for(Node n : children){
-			if(n.getResult() == TriBoolean.UNKNOWN){
-				count++;
-				next = n;
-			}		
+		if(r.getResult() == TriBoolean.UNKNOWN){
+			for(Node n : children){
+				if(n.getResult() == TriBoolean.UNKNOWN){
+					count++;
+					next = n;
+				}		
+			}
+			
+			if(count == 1){
+				ArrayList<Node> temp = new ArrayList<Node>(vTree);
+				temp.remove(r);
+				temp.removeAll(children);
+				next.backUpParent = next.parent;
+				next.parent = null;
+				temp.add(next);
+				return findSimplifiedPost(temp);
+			}else {
+				return r;	
+			}
+		}else{
+			return r.getParent();
 		}
 		
-		if(count == 1){
-			vTree.remove(r);
-			vTree.removeAll(children);
-			next.parent = null;
-			vTree.add(next);
-			return findSimplifiedPost(vTree);
-		}else {
-			return r;	
-		}
 		
 
+	}
+
+	public static TriBoolean repopulate(Node n, ArrayList<Node> vTree) {
+		normalizeTree(vTree);
+		Node r = findRoot(vTree);
+		
+		while(r.getResult() == TriBoolean.UNKNOWN){
+			Node s = findSimplifiedPost(vTree);	
+			TriBoolean res = TriBoolean.compute(findChildren(s, vTree));
+			s.setResult(res);	
+			normalizeTree(vTree);
+		}
+		
+		return r.getResult();
+	}
+
+	private static void normalizeTree(ArrayList<Node> tree) {
+		for(Node n : tree){
+			if(n.getBackUpParent()!=null){
+				n.setParent(n.getBackUpParent());
+				n.setBackUpParent(null);
+			}
+		}	
 	}
 	
 	
