@@ -47,7 +47,7 @@ public class incrementalDriver {
 
 		init();
 		IncrementalResult hsm2fsmRes = verify_initial("HSM2FSM");
-		inc_verify_post_cache("HSM2FSM", "TEST", "IS2IS", hsm2fsmRes);
+		inc_verify_post_cache("HSM2FSM", "TEST", "IS2IS", hsm2fsmRes, true);
 	}
 
 	public static void init() {
@@ -71,13 +71,11 @@ public class incrementalDriver {
 					putInCacheSubs(srcProj, post, subgoal.getId(), "true");
 				}
 
-				//System.out.println(postV);
 			} else {
 
 				for (IdNode subgoal : src.getLeafs4Posts().get(post)) {
 					VerificationResult r = executioner.verify(post, subgoal.getId());
 					putInCacheSubs(srcProj, post, subgoal.getId(), r.getResult());
-					//System.out.println(r);
 
 				}
 
@@ -123,23 +121,22 @@ public class incrementalDriver {
 		return tar;
 	}
 
-	public static void inc_verify_post_cache(String srcProj, String tarProj, String opRule, IncrementalResult src)
+	public static void inc_verify_post_cache(String srcProj, String tarProj, String opRule, IncrementalResult src, boolean useCache)
 			throws Exception {
 
+		long start = System.currentTimeMillis();
+		
 		IncrementalResult tar = load(genConf(tarProj));
 
 		executioner.init(tarProj);
 
 		for (String post : tar.getLeafs4Posts().keySet()) {
-			long start = System.currentTimeMillis();
+			
 			Set<String> r1 = src.getRules4Posts().get(post);
 			Set<String> r2 = tar.getRules4Posts().get(post);
 			if (r1.containsAll(r2) && r2.containsAll(r1) && !r2.contains(opRule)) {
 				String res = findInCachePosts(srcProj, post);
 				putInCachePosts(tarProj, post, res);
-				
-				String id = String.format("%s-%s-original", tarProj, post);
-				System.out.println(new VerificationResult(id, res, 0));
 				
 			} else {
 
@@ -148,13 +145,18 @@ public class incrementalDriver {
 					IdNode cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
 					if (cache != null && !subgoal.getNode().getInvolvedRuls().contains(opRule)) {
 
-						String res = CacheSubs.get(srcProj).get(post).get(cache.getId());
+						if(useCache){
+							String res = CacheSubs.get(srcProj).get(post).get(cache.getId());
 
-						if (res.equals("true")) {
-							subgoal.getNode().setResult(TriBoolean.TRUE);
-						} else if (res.equals("false")) {
-							subgoal.getNode().setResult(TriBoolean.FALSE);
+							if (res.equals("true")) {
+								subgoal.getNode().setResult(TriBoolean.TRUE);
+							} else if (res.equals("false")) {
+								subgoal.getNode().setResult(TriBoolean.FALSE);
+							}
+						}else{
+							subgoal.getNode().setResult(TriBoolean.UNKNOWN);
 						}
+						
 
 					} else {
 						subgoal.getNode().setResult(TriBoolean.UNKNOWN);
@@ -181,40 +183,39 @@ public class incrementalDriver {
 
 				// find node
 				Node simPost = NodeHelper.findSimplifiedPost(tarResultTree);
-				// verify node
-				String simPostBpl = constructTask(tarProj, post, simPost, tar.getRules4Posts().get(post), tar.getEnv(),
-						tar.getTarmm(), tar.getInfers4Posts());
-				System.out.println();
-
-				// update result and repopulate verification result tree
-
-				VerificationResult simPostV = executioner.verify(post, simPostBpl);
-				simPost.setResult(simPostV.getTriBooleanResult());
-				String fnRes = NodeHelper.repopulate(simPost, tarResultTree).toString().toLowerCase();
-
+				String fnRes;
+				if(simPost!=null){
+					// verify node
+					String simPostBpl = constructTask(tarProj, post, simPost, tar.getRules4Posts().get(post), tar.getEnv(),
+							tar.getTarmm(), tar.getInfers4Posts());
+					
+					// update result and repopulate verification result tree
+					VerificationResult simPostV = executioner.verify(post, simPostBpl);
+					simPost.setResult(simPostV.getTriBooleanResult());
+					fnRes = NodeHelper.repopulate(simPost, tarResultTree).toString().toLowerCase();					
+				}else{
+					//assert result of root is not unknown.
+					Node root = NodeHelper.findRoot(tarResultTree);
+					fnRes = root.getResult().toString().toLowerCase();
+				}
+				
 				if (fnRes.equals("true")) {
 					for (IdNode n : tar.getLeafs4Posts().get(post)) {
 						putInCacheSubs(tarProj, post, n.getId(), "true");
 					}
-
 				}
 
-				long end = System.currentTimeMillis();
-
 				putInCachePosts(tarProj, post, fnRes);
-				String id = String.format("%s-%s-simplfied", tarProj, post);
-				System.out.println(new VerificationResult(id, fnRes, end - start));
-
+				
+				//String res = String.format("%s: %s", post, fnRes);
+				//System.out.println(res);
 			}
 		}
-
+		long end = System.currentTimeMillis();
+		String res = String.format("%s: %s", tarProj,  end - start);
+		System.out.println(res);
 	}
 
-// public static void inc_verify_post_nocache(String srcProj, String tarProj, String opRule, IncrementalResult src)
-//	// get leaf res
-//	for (IdNode subgoal : tar.getLeafs4Posts().get(post)) {
-//		subgoal.getNode().setResult(TriBoolean.UNKNOWN);
-//	}
 
 
 
