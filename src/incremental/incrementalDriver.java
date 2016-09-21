@@ -20,6 +20,7 @@ import org.eclipse.m2m.atl.common.OCL.OclExpression;
 import org.eclipse.m2m.atl.emftvm.ExecEnv;
 
 import Ocl.Ocl2Boogie;
+import Ocl.Printer;
 import Ocl.TypeInference;
 import contract.ContractLoader;
 import contract.Elimination;
@@ -47,7 +48,8 @@ public class incrementalDriver {
 
 		init();
 		IncrementalResult hsm2fsmRes = verify_loc("HSM2FSM");
-		inc_verify_post_cache("HSM2FSM", "TEST", "IS2IS", hsm2fsmRes, true);
+		incrementalDriver.inc_verify_sub("HSM2FSM", "MF6", "T2TB", hsm2fsmRes);
+		incrementalDriver.inc_verify_sub("HSM2FSM", "AF2", "RS2RS", hsm2fsmRes);
 	}
 
 	public static void init() {
@@ -113,7 +115,7 @@ public class incrementalDriver {
 	}
 
 	
-	// TODO some optimization ?
+	
 	public static IncrementalResult inc_verify_sub(String srcProj, String tarProj, String opRule, IncrementalResult src)
 			throws Exception {
 
@@ -124,28 +126,37 @@ public class incrementalDriver {
 		executioner.init(tarProj);
 		for (String post : tar.getLeafs4Posts().keySet()) {
 
-			VerificationResult postV = executioner.verify(post, "original");
-
-			if (postV.getResult().equals("true")) {
+			Set<String> r1 = src.getRules4Posts().get(post);
+			Set<String> r2 = tar.getRules4Posts().get(post);
+			if (r1.containsAll(r2) && r2.containsAll(r1) && !r2.contains(opRule)) {
+				//String res = findInCachePosts(srcProj, post);
+				//putInCachePosts(tarProj, post, res);
 				
-				//System.out.println(postV);
-			} else {
-				for (Node subgoal : tar.getLeafs4Posts().get(post)) {
-					Node cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
-					if (cache != null && !subgoal.getInvolvedRuls().contains(opRule)) {
+			}else{
+				VerificationResult postV = executioner.verify(post, "original");
 
-						String res = findInCacheSubs(srcProj, post, cache.getId());
-						putInCacheSubs(tarProj, post, subgoal.getId(), res);
+				if (!postV.getResult().equals("true")) {
+					for (Node subgoal : tar.getLeafs4Posts().get(post)) {
+						Node cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
+						if (cache != null && !subgoal.getInvolvedRuls().contains(opRule)) {
 
-						String id = String.format("%s-%s-%s", tarProj, post, subgoal.getId());
-						//System.out.println(new VerificationResult(id, "Cached:" + res, 0));
-					} else {
-						VerificationResult res = executioner.verify(post, subgoal.getId());
-						putInCacheSubs(tarProj, post, subgoal.getId(), res.getResult());
-						//System.out.println(res);
+							//String res = findInCacheSubs(srcProj, post, cache.getId());
+							//putInCacheSubs(tarProj, post, subgoal.getId(), res);
+
+							//String id = String.format("%s-%s-%s", tarProj, post, subgoal.getId());
+							//System.out.println(new VerificationResult(id, "Cached:" + res, 0));
+						} else {
+							VerificationResult res = executioner.verify(post, subgoal.getId());
+							//putInCacheSubs(tarProj, post, subgoal.getId(), res.getResult());
+							//System.out.println(res);
+						}
 					}
 				}
 			}
+			
+			
+			
+			
 		}
 
 		long end = System.currentTimeMillis();
@@ -361,28 +372,28 @@ public class incrementalDriver {
 	}
 
 	private static boolean compareExpressionLists(List<EObject> l1, List<EObject> l2) {
-
+		
 		List<String> s1 = new ArrayList<String>();
 		List<String> s2 = new ArrayList<String>();
 
 		for (EObject o1 : l1) {
-			s1.add(Ocl2Boogie.print(o1));
+			s1.add(Printer.print(o1));
 		}
 
 		for (EObject o2 : l2) {
-			s2.add(Ocl2Boogie.print(o2));
+			s2.add(Printer.print(o2));
 		}
 
 		return s1.containsAll(s2) && s2.containsAll(s1);
 	}
 
 	private static Node findSubgoalInCache(Node n, List<Node> nodes) {
-
+		
 		for (Node curr : nodes) {
 			boolean rule = n.getInvolvedRuls().containsAll(curr.getInvolvedRuls())
 					&& curr.getInvolvedRuls().containsAll(n.getInvolvedRuls());
-			boolean conclusion = Ocl2Boogie.print(n.getContent())
-					.equals(Ocl2Boogie.print(curr.getContent()));
+			boolean conclusion = Printer.print(n.getContent())
+					.equals(Printer.print(curr.getContent()));
 			boolean assumption = compareExpressionLists(n.getAssumptions(), curr.getAssumptions());
 
 			boolean infer = compareExpressionLists(n.getInfers(), curr.getInfers());

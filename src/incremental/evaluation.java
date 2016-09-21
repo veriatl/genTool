@@ -73,7 +73,7 @@ public class evaluation {
 	public static void main(String[] args) throws Exception {
 		
 		INC_POST_CACHE();
-		
+		INC_POST_NOCACHE();
 
 	}
 
