@@ -1,6 +1,14 @@
 package datastructure;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
+
+import org.apache.commons.io.FileUtils;
+
+import runtime.executioner;
 
 public class NodeHelper {
 
@@ -106,6 +114,52 @@ public class NodeHelper {
 				n.setBackUpParent(null);
 			}
 		}	
+	}
+
+
+
+
+	public static void printTree(String tarProj, String post, ArrayList<Node> tree) throws Exception {
+		String p = post.replace("/", "");
+		String folder = String.format("%s/Trees/", tarProj);
+		FileUtils.forceMkdir(new File(folder));
+		
+		PrintStream original = new PrintStream(System.out);
+		String file = String.format("%s/Trees/%s", tarProj, p);
+		
+		String fileName = String.format("%s.gv", file);
+		PrintStream out = new PrintStream(new FileOutputStream(fileName));
+		System.setOut(out);
+		
+		String content = "digraph G {\n";
+		
+		for(Node n : tree){
+			if(n.parent!=null){
+				content += String.format("\t%s_%s -> %s_%s;\n", 
+						n.getResult(), 
+						n.getId(), 
+						n.getParent().getResult(),
+						n.parent.getId());
+						
+			}	
+		}
+		
+		content += "}\n";
+		
+		System.out.println(content);
+		out.close();
+		System.setOut(original);
+		
+		executioner.execDot(file);
+		clean(folder, "gv");
+	}
+
+
+
+
+	private static void clean(String folder, String string) {
+		
+		//TODO delete all gv files.
 	}
 	
 	

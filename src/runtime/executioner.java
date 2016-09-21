@@ -80,11 +80,34 @@ public class executioner {
 	}
 	
 	
+	public static void execDot(String file) throws Exception{		
+		List<String> params = new ArrayList<String>();
+		params.add("dot");
+		params.add("-Tpdf");
+		params.add(String.format("%s.gv", file));
+		params.add("-o");
+		params.add(String.format("%s.pdf", file));
+			
+		
+		String[] args = params.toArray(new String[0]);		
+        Process p = Runtime.getRuntime().exec(args);
+        p.waitFor();
+        BufferedReader input = new BufferedReader(new InputStreamReader(p.getInputStream()));
+
+        
+        String line;
+        while ((line = input.readLine()) != null) {
+           System.out.println(line);
+        }
+	}
+	
+	
+	
 	
 	
 	public static void main(String[] args) throws Exception {
-		init("TEST");
-		System.out.println(verify("fsm_transition_trg_multi_lower", "simplified"));
-		
+		//init("TEST");
+		//System.out.println(verify("fsm_transition_trg_multi_lower", "simplified"));
+		execDot("TEST/Trees/fsm_state_multi_lower");
 	}
 }

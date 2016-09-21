@@ -90,13 +90,13 @@ public class incrementalDriver {
 
 			if (postV.getResult().equals("true")) {
 
-				for (IdNode subgoal : src.getLeafs4Posts().get(post)) {
+				for (Node subgoal : src.getLeafs4Posts().get(post)) {
 					putInCacheSubs(srcProj, post, subgoal.getId(), "true");
 				}
 
 			} else {
 
-				for (IdNode subgoal : src.getLeafs4Posts().get(post)) {
+				for (Node subgoal : src.getLeafs4Posts().get(post)) {
 					VerificationResult r = executioner.verify(post, subgoal.getId());
 					putInCacheSubs(srcProj, post, subgoal.getId(), r.getResult());
 
@@ -130,9 +130,9 @@ public class incrementalDriver {
 				
 				//System.out.println(postV);
 			} else {
-				for (IdNode subgoal : tar.getLeafs4Posts().get(post)) {
-					IdNode cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
-					if (cache != null && !subgoal.getNode().getInvolvedRuls().contains(opRule)) {
+				for (Node subgoal : tar.getLeafs4Posts().get(post)) {
+					Node cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
+					if (cache != null && !subgoal.getInvolvedRuls().contains(opRule)) {
 
 						String res = findInCacheSubs(srcProj, post, cache.getId());
 						putInCacheSubs(tarProj, post, subgoal.getId(), res);
@@ -175,25 +175,25 @@ public class incrementalDriver {
 			} else {
 
 				// get leaf res
-				for (IdNode subgoal : tar.getLeafs4Posts().get(post)) {
-					IdNode cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
-					if (cache != null && !subgoal.getNode().getInvolvedRuls().contains(opRule)) {
+				for (Node subgoal : tar.getLeafs4Posts().get(post)) {
+					Node cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
+					if (cache != null && !subgoal.getInvolvedRuls().contains(opRule)) {
 
 						if(useCache){
 							String res = CacheSubs.get(srcProj).get(post).get(cache.getId());
 
 							if (res.equals("true")) {
-								subgoal.getNode().setResult(TriBoolean.TRUE);
+								subgoal.setResult(TriBoolean.TRUE);
 							} else if (res.equals("false")) {
-								subgoal.getNode().setResult(TriBoolean.FALSE);
+								subgoal.setResult(TriBoolean.FALSE);
 							}
 						}else{
-							subgoal.getNode().setResult(TriBoolean.UNKNOWN);
+							subgoal.setResult(TriBoolean.UNKNOWN);
 						}
 						
 
 					} else {
-						subgoal.getNode().setResult(TriBoolean.UNKNOWN);
+						subgoal.setResult(TriBoolean.UNKNOWN);
 					}
 				}
 
@@ -215,6 +215,10 @@ public class incrementalDriver {
 					}
 				}
 
+				//[Z.C.] If prove tree want to be printed
+				//NodeHelper.printTree(tarProj, post, tarResultTree);
+				
+				
 				// find node
 				Node simPost = NodeHelper.findSimplifiedPost(tarResultTree);
 				String fnRes;
@@ -234,7 +238,7 @@ public class incrementalDriver {
 				}
 				
 				if (fnRes.equals("true")) {
-					for (IdNode n : tar.getLeafs4Posts().get(post)) {
+					for (Node n : tar.getLeafs4Posts().get(post)) {
 						putInCacheSubs(tarProj, post, n.getId(), "true");
 					}
 				}
@@ -372,16 +376,16 @@ public class incrementalDriver {
 		return s1.containsAll(s2) && s2.containsAll(s1);
 	}
 
-	private static IdNode findSubgoalInCache(IdNode n, List<IdNode> nodes) {
+	private static Node findSubgoalInCache(Node n, List<Node> nodes) {
 
-		for (IdNode curr : nodes) {
-			boolean rule = n.getNode().getInvolvedRuls().containsAll(curr.getNode().getInvolvedRuls())
-					&& curr.getNode().getInvolvedRuls().containsAll(n.getNode().getInvolvedRuls());
-			boolean conclusion = Ocl2Boogie.print(n.getNode().getContent())
-					.equals(Ocl2Boogie.print(curr.getNode().getContent()));
-			boolean assumption = compareExpressionLists(n.getNode().getAssumptions(), curr.getNode().getAssumptions());
+		for (Node curr : nodes) {
+			boolean rule = n.getInvolvedRuls().containsAll(curr.getInvolvedRuls())
+					&& curr.getInvolvedRuls().containsAll(n.getInvolvedRuls());
+			boolean conclusion = Ocl2Boogie.print(n.getContent())
+					.equals(Ocl2Boogie.print(curr.getContent()));
+			boolean assumption = compareExpressionLists(n.getAssumptions(), curr.getAssumptions());
 
-			boolean infer = compareExpressionLists(n.getNode().getInfers(), curr.getNode().getInfers());
+			boolean infer = compareExpressionLists(n.getInfers(), curr.getInfers());
 
 			if (rule && conclusion && assumption && infer) {
 				return curr;
@@ -415,7 +419,7 @@ public class incrementalDriver {
 		List<OclExpression> postconditions = ContractLoader.init(contractPath);
 		List<MatchedRule> rules = TransformationLoader.init(transformationSrcPath);
 
-		Map<String, List<IdNode>> leafs4Posts = new HashMap<String, List<IdNode>>();
+		Map<String, List<Node>> leafs4Posts = new HashMap<String, List<Node>>();
 		Map<String, ArrayList<Node>> tree4Posts = new HashMap<String, ArrayList<Node>>();
 		Map<String, Set<String>> rules4Posts = new HashMap<String, Set<String>>();
 		Map<String, Map<String, String>> infers4Posts = new HashMap<String, Map<String, String>>();
@@ -489,14 +493,13 @@ public class incrementalDriver {
 
 				//
 				String id = String.format("case%02d", i);
-				IdNode currNode = new IdNode(id, n);
-
+				n.setId(id);
 				if (leafs4Posts.get(goalName) == null) {
-					List<IdNode> nodes = new ArrayList<IdNode>();
-					nodes.add(currNode);
+					List<Node> nodes = new ArrayList<Node>();
+					nodes.add(n);
 					leafs4Posts.put(goalName, nodes);
 				} else {
-					leafs4Posts.get(goalName).add(currNode);
+					leafs4Posts.get(goalName).add(n);
 				}
 
 				relatedRules.addAll(n.getInvolvedRuls());

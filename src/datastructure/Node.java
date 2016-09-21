@@ -16,7 +16,7 @@ import transformation.Trace;
 
 public class Node implements Comparable {
 
-
+	String id;
 	int level;
 	OclExpression content;
 	Node parent;
@@ -34,6 +34,7 @@ public class Node implements Comparable {
 		this.rel2Parent = rel;
 		this.ruleApplied = rule;
 		this.res = TriBoolean.UNKNOWN;
+		this.id = Integer.toHexString(this.hashCode());
 	}
 
 	
@@ -206,7 +207,7 @@ public class Node implements Comparable {
 		}
 		
 		return String.format("Lv: %d\n Node: %s, Parent: %s\nctx: [%s], \n===\nGoal: %s, \napplied %s\nResult: %s\n", 
-				level, Integer.toHexString(this.hashCode()), h, ctx, Printer.print(content), ruleApplied, this.res.toString());
+				level, id, h, ctx, Printer.print(content), ruleApplied, this.res.toString());
 	}
 	
 	public String toBoogie(ExecEnv env){
@@ -263,6 +264,16 @@ public class Node implements Comparable {
 
 	public void setBackUpParent(Node backUpParent) {
 		this.backUpParent = backUpParent;
+	}
+
+
+	public String getId() {
+		return id;
+	}
+
+
+	public void setId(String id) {
+		this.id = id;
 	}
 
 

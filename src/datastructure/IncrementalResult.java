@@ -8,11 +8,11 @@ import java.util.Set;
 import org.eclipse.emf.ecore.EPackage;
 import org.eclipse.m2m.atl.emftvm.ExecEnv;
 
-import incremental.IdNode;
+
 
 public class IncrementalResult {
 
-	Map<String, List<IdNode>> leafs4Posts;
+	Map<String, List<Node>> leafs4Posts;
 	Map<String, ArrayList<Node>> trees4Posts;
 	Map<String, Set<String>> rules4Posts;
 	ExecEnv env;
@@ -20,7 +20,7 @@ public class IncrementalResult {
 	Map<String, Map<String, String>> infers4Posts;
 	
 	
-	public IncrementalResult(Map<String, List<IdNode>> leafs, Map<String, ArrayList<Node>> tree, Map<String, Set<String>> rules, ExecEnv e, EPackage mm, Map<String, Map<String, String>> i){
+	public IncrementalResult(Map<String, List<Node>> leafs, Map<String, ArrayList<Node>> tree, Map<String, Set<String>> rules, ExecEnv e, EPackage mm, Map<String, Map<String, String>> i){
 		leafs4Posts = leafs;
 		trees4Posts = tree;
 		rules4Posts = rules;
@@ -29,11 +29,11 @@ public class IncrementalResult {
 		infers4Posts = i;
 	}
 	
-	public Map<String, List<IdNode>> getLeafs4Posts() {
+	public Map<String, List<Node>> getLeafs4Posts() {
 		return leafs4Posts;
 	}
 
-	public void setLeafs4Posts(Map<String, List<IdNode>> leafs4Posts) {
+	public void setLeafs4Posts(Map<String, List<Node>> leafs4Posts) {
 		this.leafs4Posts = leafs4Posts;
 	}
 
