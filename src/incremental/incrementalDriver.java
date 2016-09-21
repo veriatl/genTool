@@ -129,8 +129,8 @@ public class incrementalDriver {
 			Set<String> r1 = src.getRules4Posts().get(post);
 			Set<String> r2 = tar.getRules4Posts().get(post);
 			if (r1.containsAll(r2) && r2.containsAll(r1) && !r2.contains(opRule)) {
-				//String res = findInCachePosts(srcProj, post);
-				//putInCachePosts(tarProj, post, res);
+				String res = findInCachePosts(srcProj, post);
+				putInCachePosts(tarProj, post, res);
 				
 			}else{
 				VerificationResult postV = executioner.verify(post, "original");
@@ -140,14 +140,14 @@ public class incrementalDriver {
 						Node cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
 						if (cache != null && !subgoal.getInvolvedRuls().contains(opRule)) {
 
-							//String res = findInCacheSubs(srcProj, post, cache.getId());
-							//putInCacheSubs(tarProj, post, subgoal.getId(), res);
+							String res = findInCacheSubs(srcProj, post, cache.getId());
+							putInCacheSubs(tarProj, post, subgoal.getId(), res);
 
 							//String id = String.format("%s-%s-%s", tarProj, post, subgoal.getId());
 							//System.out.println(new VerificationResult(id, "Cached:" + res, 0));
 						} else {
 							VerificationResult res = executioner.verify(post, subgoal.getId());
-							//putInCacheSubs(tarProj, post, subgoal.getId(), res.getResult());
+							putInCacheSubs(tarProj, post, subgoal.getId(), res.getResult());
 							//System.out.println(res);
 						}
 					}

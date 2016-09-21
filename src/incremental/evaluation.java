@@ -1,5 +1,10 @@
 package incremental;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
+
 import datastructure.IncrementalResult;
 
 public class evaluation {
@@ -69,12 +74,40 @@ public class evaluation {
 	
 	}
 	
+	public static void init(String folder) throws IOException{
+		
+		String[] proj = new String[]{"HSM2FSM", "DB3", "MB6", "AF2", "MF6", "DR1", "AR"};
+		
+		String destDir = new String("./");
+		String srcDir = new String(folder);
+		
+		for(String s : proj){
+			FileUtils.copyDirectory(new File(srcDir+s), new File(destDir+s));
+		}
+
+	}
+	
+	
+	public static void clean() throws IOException{
+		String[] proj = new String[]{"HSM2FSM", "DB3", "MB6", "AF2", "MF6", "DR1", "AR"};
+		
+		for(String s : proj){
+			FileUtils.deleteDirectory(new File(s));
+		}
+		
+	}
+	
 	
 	public static void main(String[] args) throws Exception {
 		
-		INC_POST_CACHE();
-		INC_POST_NOCACHE();
+		//init("not2correct/");
 
+		//ORG();
+		//LOC();
+		//INC_POST_CACHE();
+		//INC_POST_NOCACHE();
+		//INC_SUB();
+		//clean();
 	}
 
 }
