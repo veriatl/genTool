@@ -100,14 +100,14 @@ public class evaluation {
 	
 	public static void main(String[] args) throws Exception {
 		
-		//init("not2correct/");
+		init("not2correct/");
 
 		//ORG();
 		//LOC();
-		//INC_POST_CACHE();
-		//INC_POST_NOCACHE();
-		//INC_SUB();
-		//clean();
+		INC_POST_CACHE();
+		INC_POST_NOCACHE();
+		INC_SUB();
+		clean();
 	}
 
 }

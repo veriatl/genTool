@@ -120,9 +120,15 @@ public class incrementalDriver {
 			throws Exception {
 
 		long start = System.currentTimeMillis();
+		int totalChk = 0;
+		int totalReused = 0;
+		
 		
 		IncrementalResult tar = load(genConf(tarProj));
 
+		
+		
+		
 		executioner.init(tarProj);
 		for (String post : tar.getLeafs4Posts().keySet()) {
 
@@ -132,10 +138,14 @@ public class incrementalDriver {
 				String res = findInCachePosts(srcProj, post);
 				putInCachePosts(tarProj, post, res);
 				
+				totalChk += src.getLeafs4Posts().get(post).size();
+				totalReused +=src.getLeafs4Posts().get(post).size();
 			}else{
 				VerificationResult postV = executioner.verify(post, "original");
 
 				if (!postV.getResult().equals("true")) {
+					totalChk += src.getLeafs4Posts().get(post).size();
+					
 					for (Node subgoal : tar.getLeafs4Posts().get(post)) {
 						Node cache = findSubgoalInCache(subgoal, src.getLeafs4Posts().get(post));
 						if (cache != null && !subgoal.getInvolvedRuls().contains(opRule)) {
@@ -143,6 +153,8 @@ public class incrementalDriver {
 							String res = findInCacheSubs(srcProj, post, cache.getId());
 							putInCacheSubs(tarProj, post, subgoal.getId(), res);
 
+							totalReused += 1;
+							
 							//String id = String.format("%s-%s-%s", tarProj, post, subgoal.getId());
 							//System.out.println(new VerificationResult(id, "Cached:" + res, 0));
 						} else {
@@ -161,7 +173,7 @@ public class incrementalDriver {
 
 		long end = System.currentTimeMillis();
 		
-		System.out.println(String.format("%s: %s", tarProj, end-start));
+		System.out.println(String.format("%s: %s: %s/%s", tarProj, end-start, totalReused, totalChk));
 		
 		return tar;
 	}
@@ -170,6 +182,8 @@ public class incrementalDriver {
 			throws Exception {
 
 		long start = System.currentTimeMillis();
+		int total = 6;
+		int reuse = 0;
 		
 		IncrementalResult tar = load(genConf(tarProj));
 
@@ -183,6 +197,7 @@ public class incrementalDriver {
 				String res = findInCachePosts(srcProj, post);
 				putInCachePosts(tarProj, post, res);
 				
+				reuse++;
 			} else {
 
 				// get leaf res
@@ -246,6 +261,7 @@ public class incrementalDriver {
 					//assert result of root is not unknown.
 					Node root = NodeHelper.findRoot(tarResultTree);
 					fnRes = root.getResult().toString().toLowerCase();
+					reuse++;
 				}
 				
 				if (fnRes.equals("true")) {
@@ -261,8 +277,9 @@ public class incrementalDriver {
 			}
 		}
 		long end = System.currentTimeMillis();
-		String res = String.format("%s: %s", tarProj,  end - start);
-		System.out.println(res);
+		
+		System.out.println(String.format("%s: %s: %s/%s", tarProj, end-start, reuse, total));
+
 	}
 
 
