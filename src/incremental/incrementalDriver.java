@@ -155,12 +155,12 @@ public class incrementalDriver {
 
 							totalReused += 1;
 							
-							//String id = String.format("%s-%s-%s", tarProj, post, subgoal.getId());
-							//System.out.println(new VerificationResult(id, "Cached:" + res, 0));
+							String id = String.format("%s-%s-%s", tarProj, post, subgoal.getId());
+							System.out.println(new VerificationResult(id, "Cached:" + res, 0));
 						} else {
 							VerificationResult res = executioner.verify(post, subgoal.getId());
 							putInCacheSubs(tarProj, post, subgoal.getId(), res.getResult());
-							//System.out.println(res);
+							System.out.println(res);
 						}
 					}
 				}
@@ -272,8 +272,8 @@ public class incrementalDriver {
 
 				putInCachePosts(tarProj, post, fnRes);
 				
-				//String res = String.format("%s: %s", post, fnRes);
-				//System.out.println(res);
+				String res = String.format("%s: %s", post, fnRes);
+				System.out.println(res);
 			}
 		}
 		long end = System.currentTimeMillis();
