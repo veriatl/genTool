@@ -100,10 +100,10 @@ public class evaluation {
 	
 	public static void main(String[] args) throws Exception {
 		
-		init("not2correct/");
+		init("correct2not/");
 
-		//ORG();
-		//LOC();
+		ORG();
+		LOC();
 		INC_POST_CACHE();
 		INC_POST_NOCACHE();
 		INC_SUB();

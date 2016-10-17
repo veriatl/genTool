@@ -5,9 +5,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
+
+import datastructure.NodeHelper;
+import file.fileHelper;
 
 
 public class executioner {
@@ -69,6 +74,7 @@ public class executioner {
         
         String line;
         while ((line = input.readLine()) != null) {
+           //System.out.println(line);
            if(line.indexOf(", 0 errors")!=-1){
         	 res = true;
         	 break;
@@ -102,12 +108,59 @@ public class executioner {
 	}
 	
 	
+	public static void verifyPost(String proj, String post) throws Exception{
+		System.out.println(verify(post, "original"));
+	}
+	
+	
+	public static void debugPost(String proj, String post) throws Exception{
+		String path = String.format("%s/Sub-goals/%s/", proj, post);  //TODO make folder name load from global configuration file.
+		ArrayList<String> subs = fileHelper.getFileNamesByPathExt(path, "bpl");
+		int succ = 0;
+		int total = subs.size();
+		
+		Map<String, String> map = new HashMap<String, String>();
+		
+		
+		for(String sub : subs){
+			String subName = sub.substring(0, sub.indexOf("."));
+			String res = verify(post, subName).toString();
+			
+			if(res.indexOf("Result: true")!=-1){
+				succ++;
+				map.put(subName, "true");
+			}else{
+				map.put(subName, "false");
+			}
+		}
+		
+		NodeHelper.updateTreeBasic(proj, post, map);
+		
+		if(succ!=total){
+			String treePath = String.format("%s/Trees/%s", proj, post);
+			execDot(treePath);
+			//NodeHelper.clean(treePath, "gv");
+		}
+		System.out.println(String.format("Id: %s Analyzed. Total sub-goals: %d. Failed sub-goals: %d.", post, total, succ));
+	}
 	
 	
 	
 	public static void main(String[] args) throws Exception {
-		//init("TEST");
-		//System.out.println(verify("fsm_transition_trg_multi_lower", "simplified"));
-		execDot("TEST/Trees/fsm_state_multi_lower");
+		String proj = args[0];
+		String post = args[1];
+		String task = args[2];
+		init(proj);
+		
+		if(task.equals("original")){
+			verifyPost(proj, post);
+		}else if(task.equals("debug")){
+			debugPost(proj, post);
+		}
+		
+		
+		
+		
+		
 	}
 }

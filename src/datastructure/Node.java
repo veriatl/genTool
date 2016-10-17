@@ -17,6 +17,7 @@ import transformation.Trace;
 public class Node implements Comparable {
 
 	String id;
+	String name;
 	int level;
 	OclExpression content;
 	Node parent;
@@ -35,6 +36,7 @@ public class Node implements Comparable {
 		this.ruleApplied = rule;
 		this.res = TriBoolean.UNKNOWN;
 		this.id = Integer.toHexString(this.hashCode());
+		this.name = "";
 	}
 
 	
@@ -274,6 +276,16 @@ public class Node implements Comparable {
 
 	public void setId(String id) {
 		this.id = id;
+	}
+
+
+	public String getName() {
+		return name;
+	}
+
+
+	public void setName(String name) {
+		this.name = name;
 	}
 
 

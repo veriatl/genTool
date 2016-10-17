@@ -242,8 +242,9 @@ public class incrementalDriver {
 				}
 
 				//[Z.C.] If prove tree want to be printed
-				//NodeHelper.printTree(tarProj, post, tarResultTree);
-				
+				//String gvFile = NodeHelper.printTree(tarProj, post, tarResultTree);
+				//executioner.execDot(gvFile);
+				//NodeHelper.clean(gvFile, "gv");
 				
 				// find node
 				Node simPost = NodeHelper.findSimplifiedPost(tarResultTree);

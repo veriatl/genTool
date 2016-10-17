@@ -1,10 +1,15 @@
 package datastructure;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 
@@ -119,7 +124,7 @@ public class NodeHelper {
 
 
 
-	public static void printTree(String tarProj, String post, ArrayList<Node> tree) throws Exception {
+	public static String printTree(String tarProj, String post, ArrayList<Node> tree) throws Exception {
 		String p = post.replace("/", "");
 		String folder = String.format("%s/Trees/", tarProj);
 		FileUtils.forceMkdir(new File(folder));
@@ -150,14 +155,96 @@ public class NodeHelper {
 		out.close();
 		System.setOut(original);
 		
-		executioner.execDot(file);
-		clean(folder, "gv");
+		return file;
+
 	}
 
+	public static void printTreeBasic(String tarProj, String post, ArrayList<Node> tree) throws Exception {
+		String p = post.replace("/", "");
+		String folder = String.format("%s/Trees/", tarProj);
+		FileUtils.forceMkdir(new File(folder));
+		
+		PrintStream original = new PrintStream(System.out);
+		String file = String.format("%s/Trees/%s", tarProj, p);
+		
+		String fileName = String.format("%s.gv", file);
+		PrintStream out = new PrintStream(new FileOutputStream(fileName));
+		System.setOut(out);
+		
+		String content = "digraph G {\n";
+		
+		for(Node n : tree){
+			if(n.parent!=null){
+				String nName = n.getName();
+				String pName = n.getParent().getName();
+				
+				if(nName.equals("")){
+					nName = "_"+n.getId();
+				}
+				
+				if(pName.equals("")){
+					pName = "_"+n.parent.getId();
+				}
+				
+				content += String.format("\t%s -> %s;\n", nName, pName);	
+			}	
+		}
+		
+		content += "}\n";
+		
+		System.out.println(content);
+		out.close();
+		System.setOut(original);
+		
 
+	}
 
+	public static void updateTreeBasic(String tarProj, String post, Map<String, String> map) throws Exception {
+		String p = post.replace("/", "");
+		String folder = String.format("%s/Trees/", tarProj);
+		FileUtils.forceMkdir(new File(folder));
+		
+		PrintStream original = new PrintStream(System.out);
+		String file = String.format("%s/Trees/%s", tarProj, p);
+		
+		String fileName = String.format("%s.gv", file);
+		
+		
+		// read in content
+		BufferedReader input = new BufferedReader (new InputStreamReader (new FileInputStream (fileName)));
+		String line;
+		String content = "";
+        while ((line = input.readLine()) != null) {
+           if(line.indexOf("}") != -1){
+        	   break;
+           }else if(line.indexOf("[shape=circle, style=filled, fillcolor=red]")!=-1){
+        	   continue;
+           }
+           else{
+        	   content += line+"\n";
+           }
+        }
+		
+        input.close();
+		
+        
+        // update content
+		for(String k : map.keySet()){
+			if(map.get(k).equals("false")){
+				content += String.format("%s[shape=circle, style=filled, fillcolor=red]\n", k);
+			}
+		}
+		content += "}\n";
+		PrintStream out = new PrintStream(new FileOutputStream(fileName), false);
+		System.setOut(out);
+		System.out.println(content);
+		out.close();
+		System.setOut(original);
+		
 
-	private static void clean(String folder, String string) {
+	}
+	
+	public static void clean(String filePath, String ext) {
 		
 		//TODO delete all gv files.
 	}

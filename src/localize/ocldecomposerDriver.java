@@ -1,4 +1,4 @@
-package driver;
+package localize;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,6 +26,7 @@ import datastructure.ContextEntry;
 import datastructure.Node;
 import datastructure.NodeHelper;
 import datastructure.ProveOption;
+import file.fileHelper;
 import metamodel.EMFLoader;
 import transformation.GenBy;
 import transformation.Trace;
@@ -45,16 +46,30 @@ public class ocldecomposerDriver {
 		long start = System.currentTimeMillis();
 		PrintStream original = System.out;
 		
-		ExecEnv env = Trace.moduleLoader(args[0], args[1], args[2], args[3], args[4], args[5]);
-		EPackage tarmm = EMFLoader.loadEcore(args[3]);
-		EPackage srcmm = EMFLoader.loadEcore(args[2]);
+		if(args.length < 1){
+	    	throw new Exception("no option provided to continue VeriATL, using \"help\" to see available options");
+	    }
+		
+		Map<String, String> dirs = fileHelper.loadDirPlus();
+		String projPath = args[0];
+		String emftvm = projPath+dirs.get("emftvm")+"/";
+		String moduleName = fileHelper.getFirstFileNamebyExt(emftvm, "emftvm");
+		String srcmmPath = fileHelper.getFirstFilePathbyExt(projPath+dirs.get("srcmm"), "ecore");
+		String tarmmPath = fileHelper.getFirstFilePathbyExt(projPath+dirs.get("tarmm"), "ecore");
+		String srcmmName = fileHelper.getFirstFileNamebyExt(projPath+dirs.get("srcmm"), "ecore");
+		String tarmmName = fileHelper.getFirstFileNamebyExt(projPath+dirs.get("tarmm"), "ecore");
+		
+		
+		String contractPath = fileHelper.getFirstFilePathbyExt(projPath+dirs.get("contract_src"), "atl");
+		String transformationSrcPath = fileHelper.getFirstFilePathbyExt(projPath+dirs.get("atl_src"), "atl");
+		String subGoalsPath = projPath+dirs.get("subgoal")+"/";
+		String genByPath = projPath+dirs.get("subgoal")+"/";
+		
+		ExecEnv env = Trace.moduleLoader(emftvm, moduleName, srcmmPath, tarmmPath, srcmmName, tarmmName);
+		
+		EPackage srcmm = EMFLoader.loadEcore(srcmmPath);
+		EPackage tarmm = EMFLoader.loadEcore(tarmmPath);
 		Map<String, ArrayList<String>> trace = Trace.getTrace(tarmm, env);
-		
-		String contractPath = args[6];
-		String transformationSrcPath = args[7];
-		String subGoalsPath = args[8];
-		String genByPath = args[9];
-		
 		
 		List<OclExpression> postconditions = ContractLoader.init(contractPath);
 		List<MatchedRule> rules = TransformationLoader.init(transformationSrcPath);
@@ -126,10 +141,12 @@ public class ocldecomposerDriver {
 				System.setOut(out);
 				System.out.println(n.toBoogie(env));
 			
+				n.setName(String.format("case%02d", i));
 				i++;
 			}
 			
 			printDriver(env, post, folderName);
+			NodeHelper.printTreeBasic(projPath, goalName, tree);
 		}
 		
 		
@@ -141,6 +158,8 @@ public class ocldecomposerDriver {
 		System.setOut(original);
 		long end = System.currentTimeMillis();
 		System.out.println(end-start);
+		
+		
 	}
 
 	private static void printDriver(ExecEnv env, OclExpression post, String folderName) throws Exception {
