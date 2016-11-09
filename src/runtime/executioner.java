@@ -74,7 +74,7 @@ public class executioner {
         
         String line;
         while ((line = input.readLine()) != null) {
-           //System.out.println(line);
+           System.out.println(line);
            if(line.indexOf(", 0 errors")!=-1){
         	 res = true;
         	 break;
@@ -141,7 +141,7 @@ public class executioner {
 			execDot(treePath);
 			//NodeHelper.clean(treePath, "gv");
 		}
-		System.out.println(String.format("Id: %s Analyzed. Total sub-goals: %d. Failed sub-goals: %d.", post, total, succ));
+		System.out.println(String.format("Id: %s Analyzed. Total sub-goals: %d. Failed sub-goals: %d.", post, total, total-succ));
 	}
 	
 	

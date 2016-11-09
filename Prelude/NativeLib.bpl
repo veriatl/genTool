@@ -10,22 +10,11 @@ var $linkHeap : HeapType where $IsGoodHeap($tarHeap);
 
 
 
-function getTarsBySrcs(Seq ref): ref;
-
-function getTarsBySrcs_inverse(ref): Seq ref;
-axiom (forall i: Seq ref :: { getTarsBySrcs(i) } getTarsBySrcs_inverse(getTarsBySrcs(i)) == i);
-
-function getTarsBySrcs2(Seq ref): ref;
-
-function getTarsBySrcs2_inverse(ref): Seq ref;
-axiom (forall i: Seq ref :: { getTarsBySrcs2(i) } getTarsBySrcs2_inverse(getTarsBySrcs2(i)) == i);
-
-
 
 procedure NTransientLink#setRule
 	(stk: Seq BoxType, link: ref, ruleName: String) 
 returns 
-	(newStk: Seq BoxType)
+	(newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2; 
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):String == ruleName;
   requires dtype(link) <: Native$TransientLink;
@@ -37,17 +26,13 @@ returns
   ensures (forall<alpha> $o: ref, $f: Field alpha :: { read($linkHeap, $o, $f) } $o != null && read(old($linkHeap), $o, alloc) ==> read($linkHeap, $o, $f) == read(old($linkHeap), $o, $f) || $o == link);
   ensures $HeapSucc(old($linkHeap), $linkHeap); 
   ensures newStk == Seq#Take(stk, Seq#Length(stk)-2);
-{
-	$linkHeap := update($linkHeap, link, TransientLink#rule, ruleName);
-	assume $IsGoodHeap($linkHeap);
-	newStk := Seq#Take(stk, Seq#Length(stk)-2);
-}
+
   
 
 procedure  NTransientLink#addSourceElement
 	(stk: Seq BoxType, link: ref, key: String, val: ref) 
 returns 
-	(newStk: Seq BoxType)
+	(newStk: Seq BoxType);
   requires Seq#Length(stk) >= 3; 
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):ref == val;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-2)):String == key;
@@ -61,17 +46,13 @@ returns
   ensures (forall<alpha> $o: ref, $f: Field alpha :: { read($linkHeap, $o, $f) } $o != null && read(old($linkHeap), $o, alloc) ==> read($linkHeap, $o, $f) == read(old($linkHeap), $o, $f) || $o == link);
   ensures $HeapSucc(old($linkHeap), $linkHeap); 
   ensures newStk == Seq#Take(stk, Seq#Length(stk)-3);  
-{
-	$linkHeap := update($linkHeap, link, TransientLink#source, Map#Build($linkHeap[link, TransientLink#source], key, val));
-	assume $IsGoodHeap($linkHeap);
-	newStk := Seq#Take(stk, Seq#Length(stk)-3);
-}
+
   
   
 procedure NTransientLink#addTargetElement
 	(stk: Seq BoxType, link: ref, key: String, val: ref) 
 returns 
-	(newStk: Seq BoxType)
+	(newStk: Seq BoxType);
   requires Seq#Length(stk) >= 3; 
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):ref == val;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-2)):String == key;
@@ -85,37 +66,29 @@ returns
   ensures (forall<alpha> $o: ref, $f: Field alpha :: { read($linkHeap, $o, $f) } $o != null && read(old($linkHeap), $o, alloc) ==> read($linkHeap, $o, $f) == read(old($linkHeap), $o, $f) || $o == link);
   ensures $HeapSucc(old($linkHeap), $linkHeap); 
   ensures newStk == Seq#Take(stk, Seq#Length(stk)-3);
-{
-	$linkHeap := update($linkHeap, link, TransientLink#target, Map#Build($linkHeap[link, TransientLink#target], key, val));
-	assume $IsGoodHeap($linkHeap);
-	newStk := Seq#Take(stk, Seq#Length(stk)-3);
-}
+
 
 procedure NTransientLink#getSourceElement
 	(stk: Seq BoxType, link: ref, key: String) 
 returns 
-	(newStk: Seq BoxType)
+	(newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2; 
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):String == key;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-2)):ref == link;
   requires dtype(link) <: Native$TransientLink;
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(Map#Elements($linkHeap[link, TransientLink#source])[key]));
-{
-	newStk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(Map#Elements($linkHeap[link, TransientLink#source])[key]));
-}
+
 
 procedure NTransientLink#getTargetElement
 	(stk: Seq BoxType, link: ref, key: String) 
 returns 
-	(newStk: Seq BoxType)
+	(newStk: Seq BoxType);
   requires Seq#Length(stk) >= 2; 
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-1)):String == key;
   requires $Unbox(Seq#Index(stk, Seq#Length(stk)-2)):ref == link;
   requires dtype(link) <: Native$TransientLink; 
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(Map#Elements($linkHeap[link, TransientLink#target])[key]));
-{
-	newStk := Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(Map#Elements($linkHeap[link, TransientLink#target])[key]));
-}
+
 
 // TODO: refactoring, heap is not used as a parameter.
 procedure ASM#Resolve<alpha>(stk: Seq BoxType, heap: HeapType, e: alpha) returns (newStk: Seq BoxType);
@@ -236,5 +209,7 @@ const unique Native$TransientLink: ClassName;
 const unique TransientLink#source: Field (Map String ref);
 const unique TransientLink#target: Field (Map String ref);
 const unique TransientLink#rule: Field String;
+const unique _#native: String;
+const unique _TransientLink: String;
   axiom classifierTable[_#native, _TransientLink] == Native$TransientLink;
 
