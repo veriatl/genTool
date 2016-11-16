@@ -182,7 +182,8 @@ public class Ocl2Boogie {
 	public static String _print(NavigationOrAttributeCallExp expr){	
 		String srcTp = TypeInference.infer(expr.getSource(), tarMM);
 		String heap = getHeapName(tarMM, srcTp);
-		String op = String.format("%s.%s", srcTp, expr.getName());
+		//String op = String.format("%s.%s", srcTp, expr.getName());
+		String op = EMFHelper.getAbstractStrcturalFeature(tarMM, srcTp, expr.getName());
 		String rtn = String.format("read(%s, %s, %s)", heap, print(expr.getSource()), op);	
 		return rtn;
 	}
