@@ -149,7 +149,7 @@ function Fun#LIB#AllInstanceFrom(h:HeapType, t: ClassName): Seq ref;
   // all the model elements contained by the return result are unique 
   axiom (forall h:HeapType, t: ClassName, i,j:int :: 
     ( (0<=i && i<Seq#Length(Fun#LIB#AllInstanceFrom(h, t))) && 
-	  (i+1<=j && j<Seq#Length(Fun#LIB#AllInstanceFrom(h, t))) ) ==>
+	  (0<=j && j<Seq#Length(Fun#LIB#AllInstanceFrom(h, t))) && i != j) ==>
 		Seq#Index(Fun#LIB#AllInstanceFrom(h, t),i) != Seq#Index(Fun#LIB#AllInstanceFrom(h, t),j)
   ); 
   
