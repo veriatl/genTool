@@ -238,8 +238,7 @@ function OrderedSet#InsertAt<T>(Seq T, int, T): Seq T;
   
 // ---------------------------------------------------------------
 // OCL: Sequence - Generic Iterators, 
-// see 'testLibOCL.bpl' for example of its application
-// TODO: consider refactoring
+// In here, we return Seq ref instead of System.array for performance
 // ---------------------------------------------------------------
 // returns a boolean value stating whether there is exactly one element of the source collection for which body evaluates to true;
 function Iterator#One<T>(s: Seq T, h: HeapType, f:[T,HeapType]bool): bool;
@@ -287,12 +286,29 @@ function Iterator#Select<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapT
 		0<=i && i<Seq#Length(Iterator#Select(lo,hi,s,h,f)) ==> f[Seq#Index(Iterator#Select(lo,hi,s,h,f),i), h]
 	);
 
-// returns a collection of elements which results in applying body to each element of the source collection;			
-function Iterator#Collect<T,R>(s: Seq T, h: HeapType, f:[T,HeapType]R): Seq R;
-	axiom (forall<T,R> s: Seq T, h: HeapType, f:[T,HeapType]R :: { Iterator#Collect(s,h,f) } 
+
+
+function Iterator#Flatten(s: Seq ref, h: HeapType): Seq ref;
+	axiom (forall s: Seq ref, h: HeapType, __i: int :: 0<=__i && __i < Seq#Length(s) ==> 
+		(forall __j: int :: 0<=__j && __j<_System.array.Length(Seq#Index(s, __i)) ==>
+		   Seq#Contains(Iterator#Flatten(s, h), $Unbox(read(h, Seq#Index(s, __i), IndexField(__j))): ref)
+		)
+	);
+
+// returns a collection of elements which results in applying body to each element of the source collection;	
+// might be need to have collect<int>, collect<bool>, etc		
+function Iterator#Collect(s: Seq ref, h: HeapType, f:[ref,HeapType] ref): Seq ref;
+	axiom (forall s: Seq ref, h: HeapType, f:[ref,HeapType]ref :: { Iterator#Collect(s,h,f) } 
 		Seq#Length(s) == Seq#Length(Iterator#Collect(s,h,f))); 
-	axiom (forall<T,R> s: Seq T, h: HeapType, f:[T,HeapType]R, i: int :: {Seq#Index(Iterator#Collect(s,h,f),i)}
+	axiom (forall s: Seq ref, h: HeapType, f:[ref,HeapType]ref, i: int :: {Seq#Index(Iterator#Collect(s,h,f),i)}
 		0<=i && i<Seq#Length(s) ==> f[Seq#Index(s,i),h] == Seq#Index(Iterator#Collect(s,h,f),i));
+
+function Iterator#Collect#Box(s: Seq BoxType, h: HeapType, f:[ref,HeapType] ref): Seq ref;
+	axiom (forall s: Seq BoxType, h: HeapType, f:[ref,HeapType]ref :: { Iterator#Collect#Box(s,h,f) } 
+		Seq#Length(s) == Seq#Length(Iterator#Collect#Box(s,h,f))); 
+	axiom (forall s: Seq BoxType, h: HeapType, f:[ref,HeapType]ref, i: int :: {Seq#Index(Iterator#Collect#Box(s,h,f),i)}
+		0<=i && i<Seq#Length(s) ==> f[$Unbox(Seq#Index(s,i)),h] == Seq#Index(Iterator#Collect#Box(s,h,f),i));
+
 
 // returns the subset of the source collection for which body evaluates to false
 function Iterator#Reject<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T,HeapType]bool): Seq T;

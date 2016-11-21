@@ -56,7 +56,7 @@ public class Ocl2Boogie {
 		return rtn;
 	}
 	
-	
+	//TODO case analysis on src
 	static String _print(IteratorExp expr) {
 		String rtn = Keyword.EMPTY_STRING;
 		Iterator bv = expr.getIterators().get(0);
