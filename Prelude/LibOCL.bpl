@@ -290,11 +290,26 @@ function Iterator#Select<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapT
 //TODO
 function Iterator#Flatten(s: Seq ref, h: HeapType): Seq ref;
 	axiom (forall s: Seq ref, h: HeapType, __i: int :: 0<=__i && __i < Seq#Length(s) ==> 
-		(forall __j: int :: 0<=__j && __j<_System.array.Length(Seq#Index(s, __i)) ==>
-		   Seq#Contains(Iterator#Flatten(s, h), $Unbox(read(h, Seq#Index(s, __i), IndexField(__j))): ref)
+	  Seq#Index(s, __i) == null ==>
+	    Seq#Contains(Iterator#Flatten(s, h), Seq#Index(s, __i))
+	);
+    axiom (forall s: Seq ref, h: HeapType, __i: int :: 0<=__i && __i < Seq#Length(s) ==> 
+	  Seq#Index(s, __i) != null && read(h, Seq#Index(s, __i), alloc) && dtype(Seq#Index(s, __i)) <: class._System.array ==>
+		(forall r: ref :: Seq#Contains(Seq#FromArray(h, Seq#Index(s, __i)), $Box(r)) ==>
+		   Seq#Contains(Iterator#Flatten(s, h), r)
 		)
 	);
-
+	axiom (forall s: Seq ref, h: HeapType, r: ref :: 
+	  Seq#Contains(Iterator#Flatten(s, h), r) ==> (r==null 
+	   || (exists __i: int :: 0<=__i && __i < Seq#Length(s) 
+	       && Seq#Index(s, __i) != null 
+	       && read(h, Seq#Index(s, __i), alloc) 
+	       && dtype(Seq#Index(s, __i)) <: class._System.array
+	       && Seq#Contains(Seq#FromArray(h, Seq#Index(s, __i)), $Box(r))
+		  ) 
+	  )
+	);
+	
 // returns a collection of elements which results in applying body to each element of the source collection;	
 // might be need to have collect<int>, collect<bool>, etc		
 function Iterator#Collect(s: Seq ref, h: HeapType, f:[ref,HeapType] ref): Seq ref;
