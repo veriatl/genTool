@@ -131,19 +131,16 @@ function Fun#LIB#AllInstanceFrom(h:HeapType, t: ClassName): Seq ref;
   axiom (forall h:HeapType, t: ClassName :: 
     Seq#Length(Fun#LIB#AllInstanceFrom(h, t)) >= 0
   ); 
-  // all the model elements contained by the return result are of type $t$.
+  // all the model elements contained by the return result are of type $t$ and are allocated
   axiom (forall h:HeapType, t: ClassName, i:int :: 
 	( 0<=i && i<Seq#Length(Fun#LIB#AllInstanceFrom(h,t)) ) ==> 
 		dtype( Seq#Index(Fun#LIB#AllInstanceFrom(h,t),i) ) <: t
-  );
-  // all the model elements contained by the return result are allocated
-  axiom (forall h:HeapType, t: ClassName, i:int :: 
-	( 0<=i && i<Seq#Length(Fun#LIB#AllInstanceFrom(h,t)) ) ==> 
-		h[Seq#Index(Fun#LIB#AllInstanceFrom(h,t),i), alloc] && Seq#Index(Fun#LIB#AllInstanceFrom(h,t),i) != null
+		&& Seq#Index(Fun#LIB#AllInstanceFrom(h,t),i) != null
+		&& read(h, Seq#Index(Fun#LIB#AllInstanceFrom(h,t),i), alloc)
   );
   // all the allocated ref that of type $t$ are contained by the return result. 
   axiom (forall h:HeapType, o: ref, t: ClassName :: 
-	(h[o, alloc] && (dtype(o) <: t)) ==>
+	(o!=null && read(h, o, alloc) && dtype(o) <: t) <==>
 		Seq#Contains(Fun#LIB#AllInstanceFrom(h,t),o)
   );
   // all the model elements contained by the return result are unique 
@@ -152,8 +149,8 @@ function Fun#LIB#AllInstanceFrom(h:HeapType, t: ClassName): Seq ref;
 	  (0<=j && j<Seq#Length(Fun#LIB#AllInstanceFrom(h, t))) && i != j) ==>
 		Seq#Index(Fun#LIB#AllInstanceFrom(h, t),i) != Seq#Index(Fun#LIB#AllInstanceFrom(h, t),j)
   ); 
+
   
- 
 procedure LIB#AllInstanceFrom(stk: Seq BoxType, h: HeapType) returns (newStk: Seq BoxType, res: Seq ref);
   ensures res == Fun#LIB#AllInstanceFrom(h, $Unbox(Seq#Index(stk, Seq#Length(stk)-2)));
   ensures newStk == Seq#Build(Seq#Take(stk, Seq#Length(stk)-2), $Box(res));

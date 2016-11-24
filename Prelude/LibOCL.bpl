@@ -287,7 +287,7 @@ function Iterator#Select<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapT
 	);
 
 
-
+//TODO
 function Iterator#Flatten(s: Seq ref, h: HeapType): Seq ref;
 	axiom (forall s: Seq ref, h: HeapType, __i: int :: 0<=__i && __i < Seq#Length(s) ==> 
 		(forall __j: int :: 0<=__j && __j<_System.array.Length(Seq#Index(s, __i)) ==>
