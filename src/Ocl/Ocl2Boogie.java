@@ -63,10 +63,26 @@ public class Ocl2Boogie {
 		OclExpression loopBody = expr.getBody();
 		OclExpression loopSrc = expr.getSource();
 
-		if (expr.getName().toLowerCase().equals("forall")) {		
-			rtn = String.format("(forall %s: ref :: Seq#Contains(%s, %s) ==> %s)", bv.getVarName(), print(loopSrc), bv.getVarName(), print(loopBody));	
+		
+		
+		if (expr.getName().toLowerCase().equals("forall")) {
+			if(loopSrc instanceof NavigationOrAttributeCallExp){
+				String srcTp = TypeInference.infer(loopSrc, tarMM).replace(Keyword.TYPE_COL, "");	// srcTp must be a col, 
+				String heap = getHeapName(tarMM, srcTp);
+				rtn = String.format("(forall %s: ref :: Seq#Contains(Seq#FromArray(%s, %s), $Box(%s)) ==> %s)", bv.getVarName(), heap, print(loopSrc), bv.getVarName(), print(loopBody));	
+			}else{
+				rtn = String.format("(forall %s: ref :: Seq#Contains(%s, %s) ==> %s)", bv.getVarName(), print(loopSrc), bv.getVarName(), print(loopBody));	
+			}
+			
 		}else if (expr.getName().toLowerCase().equals("exists")) {	
-			rtn = String.format("(exists %s: ref :: Seq#Contains(%s, %s) && %s))", bv.getVarName(), print(loopSrc), bv.getVarName(), print(loopBody));	
+			if(loopSrc instanceof NavigationOrAttributeCallExp){
+				String srcTp = TypeInference.infer(loopSrc, tarMM).replace(Keyword.TYPE_COL, "");	// srcTp must be a col, 
+				String heap = getHeapName(tarMM, srcTp);
+				rtn = String.format("(exists %s: ref :: Seq#Contains(Seq#FromArray(%s, %s), $Box(%s)) && %s)", bv.getVarName(), heap, print(loopSrc), bv.getVarName(), print(loopBody));	
+			}else{
+				rtn = String.format("(exists %s: ref :: Seq#Contains(%s, %s) && %s)", bv.getVarName(), print(loopSrc), bv.getVarName(), print(loopBody));	
+			}
+			
 		}	
 
 		
