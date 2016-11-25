@@ -289,19 +289,22 @@ function Iterator#Select<T>(lo: int, hi: int, s: Seq T, h: HeapType, f:[T, HeapT
 
 //TODO
 function Iterator#Flatten(s: Seq ref, h: HeapType): Seq ref;
-	axiom (forall s: Seq ref, h: HeapType, __i: int :: 0<=__i && __i < Seq#Length(s) ==> 
+	axiom (forall s: Seq ref, h: HeapType, __i: int :: { Seq#FromArray(h, Seq#Index(s, __i)) }
+	  0<=__i && __i < Seq#Length(s) ==> 
 	  Seq#Index(s, __i) == null ==>
 	    Seq#Contains(Iterator#Flatten(s, h), Seq#Index(s, __i))
 	);
-    axiom (forall s: Seq ref, h: HeapType, __i: int :: 0<=__i && __i < Seq#Length(s) ==> 
+    axiom (forall s: Seq ref, h: HeapType, __i: int :: { Seq#FromArray(h, Seq#Index(s, __i)) }
+      0<=__i && __i < Seq#Length(s) ==> 
 	  Seq#Index(s, __i) != null && read(h, Seq#Index(s, __i), alloc) && dtype(Seq#Index(s, __i)) <: class._System.array ==>
 		(forall r: ref :: Seq#Contains(Seq#FromArray(h, Seq#Index(s, __i)), $Box(r)) ==>
 		   Seq#Contains(Iterator#Flatten(s, h), r)
 		)
 	);
-	axiom (forall s: Seq ref, h: HeapType, r: ref :: 
+	axiom (forall s: Seq ref, h: HeapType, r: ref :: {Seq#Contains(Iterator#Flatten(s, h), r)}
 	  Seq#Contains(Iterator#Flatten(s, h), r) ==> (r==null 
-	   || (exists __i: int :: 0<=__i && __i < Seq#Length(s) 
+	   || (exists __i: int :: {Seq#Index(s, __i)}
+	       0<=__i && __i < Seq#Length(s) 
 	       && Seq#Index(s, __i) != null 
 	       && read(h, Seq#Index(s, __i), alloc) 
 	       && dtype(Seq#Index(s, __i)) <: class._System.array
