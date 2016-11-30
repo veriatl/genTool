@@ -241,10 +241,26 @@ function OrderedSet#InsertAt<T>(Seq T, int, T): Seq T;
 // In here, we return Seq ref instead of System.array for performance
 // ---------------------------------------------------------------
 // returns a boolean value stating whether there is exactly one element of the source collection for which body evaluates to true;
-function Iterator#One<T>(s: Seq T, h: HeapType, f:[T,HeapType]bool): bool;
-	axiom  (forall<T> s: Seq T, h: HeapType, f:[T,HeapType]bool :: { Iterator#One(s,h,f) } 
-		Iterator#One(s,h,f) <==> Seq#Length(Iterator#Select(0,Seq#Length(s)-1,s,h,f)) == 1);
+function Iterator#One(s: Seq ref, h: HeapType, f:[ref,HeapType]bool): bool;
+	axiom  (forall s: Seq ref, h: HeapType, f:[ref,HeapType]bool :: { Iterator#One(s,h,f) } 
+		Iterator#One(s,h,f) <==> 
+			(forall  i: int :: 0<=i && i<Seq#Length(s)  ==>
+				(forall j : int :: 0<=j && j<Seq#Length(s)  ==>
+					((f[Seq#Index(s,i),h] && f[Seq#Index(s,j),h]) ==> i == j)
+				)
+			)
+	);
 
+function Iterator#One#Box(s: Seq BoxType, h: HeapType, f:[ref,HeapType]bool): bool;
+	axiom  (forall s: Seq BoxType, h: HeapType, f:[ref,HeapType]bool :: { Iterator#One#Box(s,h,f) } 
+		Iterator#One#Box(s,h,f) <==> 
+			(forall  i: int :: 0<=i && i<Seq#Length(s)  ==>
+				(forall j : int :: 0<=j && j<Seq#Length(s)  ==>
+					((f[$Unbox(Seq#Index(s,i)),h] && f[$Unbox(Seq#Index(s,j)),h]) ==> i == j)
+				)
+			)
+	);
+	
 // returns one element of the source collection for which body evaluates to true. If body never evaluates to true, the operation returns null;		
 function Iterator#Any<T>(s: Seq T, h: HeapType, f:[T,HeapType]bool): T;
 	axiom  (forall<T> s: Seq T, h: HeapType, f:[T,HeapType]bool :: 
