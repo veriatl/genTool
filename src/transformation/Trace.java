@@ -77,8 +77,7 @@ public class Trace {
 	
 	
 	
-	//TODO metamodel prefix
-	//TODO notgenby, smart generated, check
+
 	public static Map<String, ArrayList<String>> getTrace(EPackage tarmm, ExecEnv env) throws Exception{
 		
 		Map<String, ArrayList<String>> rtn = new HashMap<String, ArrayList<String>>();
