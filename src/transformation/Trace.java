@@ -90,18 +90,25 @@ public class Trace {
 			
 			for(Rule r : env.getRules()){
 				
+				int i = 0;
+				
 				for(OutputRuleElement output : r.getOutputElements()){
 					String outName = tarPrefix+output.getType();
 					
 					if(clName.equals(outName) || EMFLoader.isSubtype(outName, clName, tarmm)){
+						String traceName = String.format("%s#%d", r.getName(), i);
+								
+								
 						if(rtn.containsKey(clName)){
-							rtn.get(clName).add(r.getName());
+							rtn.get(clName).add(traceName);
 						}else{
 							ArrayList<String> trace = new ArrayList<String>();
-							trace.add(r.getName());
+							trace.add(traceName);
 							rtn.put(clName, trace);
 						}
 					}
+					
+					i++;
 				}
 			}
 		}
