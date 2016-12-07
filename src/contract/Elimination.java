@@ -151,10 +151,22 @@ public class Elimination {
 				
 				String first = trace.get(elemType).get(0);
 				
+				int pos = first.lastIndexOf("#");
+				String genBy = "";
+				
+				
+				String fstRName = first.substring(0, pos);
+				String outid = first.substring(pos);
+				if(outid.equals("0")){
+					genBy = "genBy";
+				}else{
+					genBy = String.format("genBy%s", outid);
+				}
+				
 				OperationCallExp c1 = make.createOperationCallExp();
-				c1.setOperationName("genBy");
+				c1.setOperationName(genBy);
 				StringExp s = make.createStringExp();
-				s.setStringSymbol(first);
+				s.setStringSymbol(fstRName);
 				c1.setSource(EMFCopier.deepCopy(src));
 				c1.getArguments().add(s);
 				
@@ -165,10 +177,22 @@ public class Elimination {
 				List<String> subTrace  = trace.get(elemType).subList(1, trace.get(elemType).size());
 				
 				for(String rule : subTrace ){
+					int pos2 = first.lastIndexOf("#");
+					String genBy2 = "";
+					
+					
+					String restRName = rule.substring(0, pos2);
+					String outid2 = first.substring(pos2);
+					if(outid2.equals("0")){
+						genBy2 = "genBy";
+					}else{
+						genBy2 = String.format("genBy%s", outid2);
+					}
+					
 					OperationCallExp cn = make.createOperationCallExp();
-					cn.setOperationName("genBy");
+					cn.setOperationName(genBy2);
 					StringExp sn = make.createStringExp();
-					sn.setStringSymbol(rule);
+					sn.setStringSymbol(restRName);
 					cn.setSource(EMFCopier.deepCopy(src));
 					cn.getArguments().add(sn);
 					
@@ -192,10 +216,22 @@ public class Elimination {
 			if(trace.get(elemType)!=null && trace.get(elemType).size()>0){
 				String first = trace.get(elemType).get(0);
 				
+				int pos = first.lastIndexOf("#");
+				String genBy = "";
+				
+				
+				String fstRName = first.substring(0, pos);
+				String outid = first.substring(pos);
+				if(outid.equals("0")){
+					genBy = "genBy";
+				}else{
+					genBy = String.format("genBy%s", outid);
+				}
+				
 				OperationCallExp c1 = make.createOperationCallExp();
-				c1.setOperationName("genBy");
+				c1.setOperationName(genBy);
 				StringExp s = make.createStringExp();
-				s.setStringSymbol(first);
+				s.setStringSymbol(fstRName);
 				c1.setSource(EMFCopier.deepCopy(src));
 				c1.getArguments().add(s);
 				
@@ -206,10 +242,22 @@ public class Elimination {
 				List<String> subTrace  = trace.get(elemType).subList(1, trace.get(elemType).size());
 				
 				for(String rule : subTrace){
+					int pos2 = first.lastIndexOf("#");
+					String genBy2 = "";
+					
+					
+					String restRName = rule.substring(0, pos2);
+					String outid2 = first.substring(pos2);
+					if(outid2.equals("0")){
+						genBy2 = "genBy";
+					}else{
+						genBy2 = String.format("genBy%s", outid2);
+					}
+					
 					OperationCallExp cn = make.createOperationCallExp();
-					cn.setOperationName("genBy");
+					cn.setOperationName(genBy2);
 					StringExp sn = make.createStringExp();
-					sn.setStringSymbol(rule);
+					sn.setStringSymbol(restRName);
 					cn.setSource(EMFCopier.deepCopy(src));
 					cn.getArguments().add(sn);
 					
@@ -278,5 +326,17 @@ public class Elimination {
 		
 		
 		
+	}
+
+	// the input is with the format of "ruleName#outElementOrder"
+	// see Trace.java getTrace for more information
+	private static String genByGenerator(String arg) {
+		int pos = arg.lastIndexOf("#");
+		String[] args =  {arg.substring(0, pos), arg.substring(pos)};
+		
+		
+		
+		
+		return null;
 	}
 }
