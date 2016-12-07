@@ -154,10 +154,11 @@ public class Ocl2Boogie {
 			OclExpression col = expr.getSource();
 			OclExpression src = expr.getArguments().get(0);
 			rtn = String.format("!Seq#Contains(%s, %s)", print(col), print(src));
-		}else if(expr.getOperationName().equals("genBy")){
+		}else if(expr.getOperationName().startsWith("genBy")){
 			OclExpression src = expr.getSource();
 			OclExpression rl = expr.getArguments().get(0);
-			rtn = String.format("genBy(%s, %s, %s, %s)", print(src), print(rl), Keyword.SRCHEAP, Keyword.TARHEAP);
+			String op = expr.getOperationName();
+			rtn = String.format("%s(%s, %s, %s, %s)", op, print(src), print(rl), Keyword.SRCHEAP, Keyword.TARHEAP);
 		}else if(expr.getOperationName().equals("oclIsUndefined")){
 			OclExpression src = expr.getSource();
 			String srcTp = TypeInference.infer(expr.getSource(), tarMM);
