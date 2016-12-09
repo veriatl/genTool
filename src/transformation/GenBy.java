@@ -15,8 +15,11 @@ import org.eclipse.m2m.atl.emftvm.ExecEnv;
 import org.eclipse.m2m.atl.emftvm.InputRuleElement;
 import org.eclipse.m2m.atl.emftvm.OutputRuleElement;
 
+import Ocl.Ocl2Boogie;
 import Ocl.TypeInference;
 import metamodel.EMFLoader;
+import fr.emn.atlanmod.atl2boogie.xtend.ocl.*;
+
 
 public class GenBy {
 
@@ -98,6 +101,7 @@ public class GenBy {
 		if(filter == null){
 			System.out.println("true");
 		}else{
+			//System.out.println(ocl2boogie.genOclExpression(filter, "$trgHeap"));
 			System.out.println(Ocl2BoogieWithReplacer.print(filter));
 		}
 		
