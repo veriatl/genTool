@@ -22,12 +22,29 @@ public class GenBy {
 
 	private static EPackage srcMM;
 	private static List<MatchedRule> rules;
-
+	private static int depth ;
+	
 	public static void init(List<MatchedRule> rs, EPackage mm) {
 		rules = rs;
 		srcMM = mm;
 	}
 
+	
+	public static void getOutPatternDepth(){
+		
+		int max = 0;
+		
+		for (MatchedRule r : rules) {
+			int pos = r.getOutPattern().getElements().size();
+			if(pos > max){
+				max = pos;
+			}
+		}
+		
+		depth = max;
+	}
+	
+	
 	public static void print(String path) throws FileNotFoundException {
 		PrintStream original = new PrintStream(System.out);
 		
@@ -35,20 +52,28 @@ public class GenBy {
 		PrintStream out = new PrintStream(new FileOutputStream(fName));
 		System.setOut(out);
 
-		printSignature();
+		getOutPatternDepth();
+		for(int pos = 0; pos < depth; pos++){
+			printSignature(pos);
+		}
+		
 		for (MatchedRule r : rules) {
-			printAxiomHeader(r);
+			for(int pos =0; pos < r.getOutPattern().getElements().size();pos++){
+				printAxiomHeader(r, pos);
 
-			Map<String, String> replacers = getInputsMaps(r);
-			Map<String, String> types = getInputsTypes(r);
-			for (InPatternElement input : r.getInPattern().getElements()) {
-				printInputElement(input, replacers);
+				Map<String, String> replacers = getInputsMaps(r, pos);
+				Map<String, String> types = getInputsTypes(r);
+				for (InPatternElement input : r.getInPattern().getElements()) {
+					printInputElement(input, replacers);
+				}
+
+				TypeInference.init(types);
+				printFilter(r, replacers);
+				printAxiomFooter();
 			}
 
-			TypeInference.init(types);
-			printFilter(r, replacers);
-			printAxiomFooter();
 		}
+
 		out.close();
 		System.setOut(original);
 	}
@@ -86,12 +111,13 @@ public class GenBy {
 		System.out.println(s);
 	}
 
-	private static Map<String, String> getInputsMaps(MatchedRule r) {
+	private static Map<String, String> getInputsMaps(MatchedRule r, int pos) {
 		Map<String, String> rtn = new HashMap<String, String>();
-
+		String filled = pos == 0 ? "":Integer.toString(pos);
+		
 		int i = 0;
 		for (InPatternElement input : r.getInPattern().getElements()) {
-			String v = String.format("Seq#Index(getTarsBySrcs_inverse(__r), %d)", i);
+			String v = String.format("Seq#Index(getTarsBySrcs%s_inverse(__r), %d)", filled, i);
 			rtn.put(input.getVarName(), v);
 			i++;
 		}
@@ -99,9 +125,10 @@ public class GenBy {
 		return rtn;
 	}
 
-	private static void printAxiomHeader(Rule r) {
-		String s = String.format("axiom (forall __r: ref, $s: HeapType, $t: HeapType :: genBy(__r, _%s, $s, $t) <==>",
-				r.getName());
+	private static void printAxiomHeader(Rule r, int i) {
+		String filled = i == 0 ? "":Integer.toString(i);
+		String s = String.format("axiom (forall __r: ref, $s: HeapType, $t: HeapType :: genBy%s(__r, _%s, $s, $t) <==>",
+				filled, r.getName());
 		System.out.println(s);
 
 	}
@@ -112,8 +139,10 @@ public class GenBy {
 
 	}
 	
-	private static void printSignature() {
-		System.out.println("function genBy(ref, String, HeapType, HeapType): bool;");
+	private static void printSignature(int i) {
+		String filled = i == 0 ? "":Integer.toString(i);
+		String sig = String.format("function genBy%s(ref, String, HeapType, HeapType): bool;", filled);
+		System.out.println(sig);
 	}
 
 }
